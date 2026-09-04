@@ -2526,19 +2526,24 @@ function App({
    ESTIMATES PANEL  (graft-estimate requests from the Hair Transplant Guide)
    ========================================================================= */
 function ClinicChecksPanel({ rows, loading, onRefresh, onReview }) {
+  const [openId, setOpenId] = useState(null);
+  const [comment, setComment] = useState("");
+  const openRow = id => { const row = rows.find(c => c.id === id); setOpenId(id); setComment(row && row.admin_note || ""); };
+  const submit = () => { onReview(openId, comment); setOpenId(null); };
   const Row = c => {
     const d = (c.phone || "").replace(/\D/g, "");
     const wa = "https://wa.me/" + (d.length === 10 ? "91" + d : d);
+    const reviewed = c.status === "reviewed";
     return React.createElement("tr", { key: c.id },
       React.createElement("td", null, c.name || "Unnamed"),
       React.createElement("td", null, c.phone || "\u2014"),
       React.createElement("td", null, c.city || "\u2014"),
-      React.createElement("td", null, c.clinic || "\u2014"),
+      React.createElement("td", null, c.clinic || "\u2014",
+        reviewed ? React.createElement("div", { onClick: () => openRow(c.id), title: "Click to edit", style: { fontSize: 12, color: "#047857", marginTop: 3, cursor: "pointer", textDecoration: "underline dotted" } }, c.admin_note ? ("Feedback: " + c.admin_note) : "+ Add feedback") : null),
       React.createElement("td", null, c.clinic_link ? React.createElement("a", { href: c.clinic_link, target: "_blank", rel: "noreferrer", style: { color: "#047857" } }, "Open") : "\u2014"),
-      React.createElement("td", null, c.note || "\u2014"),
-      React.createElement("td", null, React.createElement("span", { className: "pill" }, c.status === "reviewed" ? "Reviewed" : "Pending")),
+      React.createElement("td", null, React.createElement("span", { className: "pill" }, reviewed ? "Reviewed" : "Pending")),
       React.createElement("td", null, React.createElement("div", { style: { display: "flex", gap: 6 } },
-        c.status !== "reviewed" && React.createElement("button", { className: "btn", onClick: () => onReview(c.id, "") }, "Mark reviewed"),
+        reviewed ? null : React.createElement("button", { className: "btn", onClick: () => openRow(c.id) }, "Mark reviewed"),
         React.createElement("a", { className: "btn sm warow", href: wa, target: "_blank", rel: "noreferrer", title: "WhatsApp" }, I.wa))));
   };
   return React.createElement("div", { style: { padding: 16 } },
@@ -2549,9 +2554,20 @@ function ClinicChecksPanel({ rows, loading, onRefresh, onReview }) {
     rows.length > 0 && React.createElement("div", { className: "tablewrap" }, React.createElement("table", null,
       React.createElement("thead", null, React.createElement("tr", null,
         React.createElement("th", null, "Name"), React.createElement("th", null, "Phone"), React.createElement("th", null, "City"),
-        React.createElement("th", null, "Clinic"), React.createElement("th", null, "Link"), React.createElement("th", null, "Note"),
-        React.createElement("th", null, "Status"), React.createElement("th", null, "Action"))),
-      React.createElement("tbody", null, rows.map(Row)))));
+        React.createElement("th", null, "Clinic / Feedback"), React.createElement("th", null, "Link"), React.createElement("th", null, "Status"), React.createElement("th", null, "Action"))),
+      React.createElement("tbody", null, rows.map(Row)))),
+    openId && (() => {
+      const row = rows.find(c => c.id === openId);
+      if (!row) return null;
+      return React.createElement("div", { style: { position: "fixed", inset: 0, background: "rgba(0,0,0,.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50 }, onClick: () => setOpenId(null) },
+        React.createElement("div", { style: { background: "#fff", borderRadius: 12, padding: 20, width: 380, maxWidth: "92vw" }, onClick: e => e.stopPropagation() },
+          React.createElement("div", { style: { marginBottom: 4 } }, React.createElement("strong", null, row.name), " \u00B7 ", row.phone),
+          row.clinic && React.createElement("div", { style: { fontSize: 13, marginBottom: 2 } }, "Clinic: ", row.clinic),
+          row.clinic_link && React.createElement("a", { href: row.clinic_link, target: "_blank", rel: "noreferrer", style: { fontSize: 13, color: "#047857", wordBreak: "break-all", display: "block", marginBottom: 10 } }, row.clinic_link),
+          React.createElement("label", { style: { fontSize: 12, fontWeight: 600 } }, "Feedback (shown to the patient)"),
+          React.createElement("textarea", { value: comment, onChange: e => setComment(e.target.value), rows: 4, placeholder: "e.g. Good clinic \u2014 verified surgeon, fair pricing. Go ahead.", style: { width: "100%", padding: 8, marginTop: 4, marginBottom: 12, borderRadius: 6, border: "1px solid #ccc" } }),
+          React.createElement("button", { className: "btn primary", style: { width: "100%" }, onClick: submit }, row.status === "reviewed" ? "Save feedback" : "Save & mark reviewed")));
+    })());
 }
 
 function VideoCallsPanel({ rows, loading, onRefresh, onSave }) {
