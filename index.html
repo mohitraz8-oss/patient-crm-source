@@ -68,7 +68,7 @@
   .wftabs{display:flex;gap:8px;margin:16px 0 14px}
   .wftab{border:1px solid var(--line-strong);background:var(--surface);border-radius:10px;padding:9px 16px;font-size:13.5px;font-weight:700;color:var(--ink-2);display:flex;align-items:center;gap:8px;box-shadow:var(--shadow-sm)}
   .wftab:hover{border-color:var(--muted)}
-  .wftab.on{background:var(--primary);border-color:var(--primary);color:#fff}
+  .wftab.on{background:var(--ink);border-color:var(--ink);color:#fff}
   .wftab .pill{background:var(--gray-bg);color:var(--gray-fg);font-size:11px;font-weight:700;padding:1px 8px;border-radius:20px}
   .wftab.on .pill{background:rgba(255,255,255,.25);color:#fff}
 
@@ -364,7 +364,7 @@
   tbody tr.row.stage-sd:hover{background:#EDE7FE}
   tbody tr.row.stage-sd td:first-child{box-shadow:inset 3px 0 0 var(--purple-fg)}
   .badge.stage-pill.purple{background:#E8E2FD;color:#4B2BB0;border-color:#C7B9F5}
-  .stat.alert{border-color:var(--purple-fg);box-shadow:0 0 0 1px var(--purple-fg) inset}
+  .stat.alert{border-color:var(--line)}
 
   /* ---- stage picker label ---- */
   .stagepick .sp-label{white-space:nowrap;pointer-events:none;position:relative;z-index:1}
@@ -2538,7 +2538,7 @@ function ClinicChecksPanel({ rows, loading, onRefresh, onReview }) {
       React.createElement("td", null, React.createElement("span", { className: "pill" }, c.status === "reviewed" ? "Reviewed" : "Pending")),
       React.createElement("td", null, React.createElement("div", { style: { display: "flex", gap: 6 } },
         c.status !== "reviewed" && React.createElement("button", { className: "btn", onClick: () => onReview(c.id, "") }, "Mark reviewed"),
-        React.createElement("a", { className: "btn", href: wa, target: "_blank", rel: "noreferrer", style: { display: "inline-flex", alignItems: "center", gap: 5, color: "#128C7E", fontWeight: 600 } }, I.whatsapp, "WhatsApp"))));
+        React.createElement("a", { className: "btn sm warow", href: wa, target: "_blank", rel: "noreferrer", title: "WhatsApp" }, I.wa))));
   };
   return React.createElement("div", { style: { padding: 16 } },
     React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 } },
@@ -2643,7 +2643,7 @@ function ContactsPanel({ contacts, loading, onRefresh, onMarkContacted }) {
       React.createElement("td", null, c.call_requested_at ? new Date(c.call_requested_at).toLocaleString() : "\u2014"),
       React.createElement("td", null, React.createElement("div", { style: { display: "flex", gap: 6 } },
         c.contacted ? React.createElement("span", { className: "pill" }, "Contacted") : React.createElement("button", { className: "btn", onClick: () => onMarkContacted(c.id) }, "Mark contacted"),
-        React.createElement("a", { className: "btn", href: wa, target: "_blank", rel: "noreferrer", style: { display: "inline-flex", alignItems: "center", gap: 5, color: "#128C7E", fontWeight: 600 } }, I.whatsapp, "WhatsApp"))));
+        React.createElement("a", { className: "btn sm warow", href: wa, target: "_blank", rel: "noreferrer", title: "WhatsApp" }, I.wa))));
   };
   return React.createElement("div", { style: { padding: 16 } },
     React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 } },
