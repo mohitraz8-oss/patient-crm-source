@@ -1293,6 +1293,7 @@ const relTime = ts => {
   });
 };
 const I = {
+  whatsapp: /*#__PURE__*/React.createElement("svg", { width: "15", height: "15", viewBox: "0 0 24 24", fill: "currentColor" }, /*#__PURE__*/React.createElement("path", { d: "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.71.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.359.101 11.945c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.652a11.882 11.882 0 005.71 1.455h.006c6.585 0 11.946-5.359 11.949-11.945a11.821 11.821 0 00-3.481-8.409z" })),
   download: /*#__PURE__*/React.createElement("svg", {
     width: "16", height: "16", viewBox: "0 0 24 24", fill: "none",
     stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round"
@@ -2524,58 +2525,56 @@ function App({
    ESTIMATES PANEL  (graft-estimate requests from the Hair Transplant Guide)
    ========================================================================= */
 function ClinicChecksPanel({ rows, loading, onRefresh, onReview }) {
-  const pending = rows.filter(c => c.status !== "reviewed");
-  const done = rows.filter(c => c.status === "reviewed");
-  const Row = c => React.createElement("div", { key: c.id, className: "ltab", style: { display: "flex", alignItems: "flex-start", gap: 12, width: "100%", padding: "10px 12px" } },
-    React.createElement("div", { style: { flex: 1, minWidth: 0 } },
-      React.createElement("div", { style: { fontWeight: 600 } }, c.name || "Unnamed"),
-      React.createElement("div", { style: { fontSize: 13 } }, c.phone, c.city ? " \u00B7 " + c.city : ""),
-      c.clinic && React.createElement("div", { style: { fontSize: 13, marginTop: 2 } }, "Clinic: ", c.clinic),
-      c.clinic_link && React.createElement("a", { href: c.clinic_link, target: "_blank", rel: "noreferrer", style: { fontSize: 13, color: "#047857", wordBreak: "break-all" } }, c.clinic_link),
-      c.note && React.createElement("div", { style: { fontSize: 12, opacity: 0.7, marginTop: 2 } }, "\u201C", c.note, "\u201D"),
-      React.createElement("div", { style: { fontSize: 11, opacity: 0.5, marginTop: 2 } }, c.created_at ? new Date(c.created_at).toLocaleString() : "")),
-    c.status !== "reviewed" ? React.createElement("button", { className: "btn", onClick: () => onReview(c.id, "") }, "Mark reviewed") : React.createElement("span", { className: "pill" }, "Reviewed"));
+  const Row = c => {
+    const d = (c.phone || "").replace(/\D/g, "");
+    const wa = "https://wa.me/" + (d.length === 10 ? "91" + d : d);
+    return React.createElement("tr", { key: c.id },
+      React.createElement("td", null, c.name || "Unnamed"),
+      React.createElement("td", null, c.phone || "\u2014"),
+      React.createElement("td", null, c.city || "\u2014"),
+      React.createElement("td", null, c.clinic || "\u2014"),
+      React.createElement("td", null, c.clinic_link ? React.createElement("a", { href: c.clinic_link, target: "_blank", rel: "noreferrer", style: { color: "#047857" } }, "Open") : "\u2014"),
+      React.createElement("td", null, c.note || "\u2014"),
+      React.createElement("td", null, React.createElement("span", { className: "pill" }, c.status === "reviewed" ? "Reviewed" : "Pending")),
+      React.createElement("td", null, React.createElement("div", { style: { display: "flex", gap: 6 } },
+        c.status !== "reviewed" && React.createElement("button", { className: "btn", onClick: () => onReview(c.id, "") }, "Mark reviewed"),
+        React.createElement("a", { className: "btn", href: wa, target: "_blank", rel: "noreferrer", style: { display: "inline-flex", alignItems: "center", gap: 5, color: "#128C7E", fontWeight: 600 } }, I.whatsapp, "WhatsApp"))));
+  };
   return React.createElement("div", { style: { padding: 16 } },
     React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 } },
-      React.createElement("strong", null, "Clinic Checks"),
-      React.createElement("button", { className: "btn", onClick: onRefresh }, "Refresh")),
+      React.createElement("strong", null, "Clinic Checks"), React.createElement("button", { className: "btn", onClick: onRefresh }, "Refresh")),
     loading && React.createElement("div", null, "Loading\u2026"),
     !loading && rows.length === 0 && React.createElement("div", { style: { opacity: 0.6 } }, "No requests yet."),
-    pending.length > 0 && React.createElement("div", { style: { marginBottom: 18 } },
-      React.createElement("div", { style: { fontSize: 12, fontWeight: 700, textTransform: "uppercase", opacity: 0.6, marginBottom: 6 } }, "To review (", pending.length, ")"), pending.map(Row)),
-    done.length > 0 && React.createElement("div", null,
-      React.createElement("div", { style: { fontSize: 12, fontWeight: 700, textTransform: "uppercase", opacity: 0.6, marginBottom: 6 } }, "Reviewed (", done.length, ")"), done.map(Row)));
+    rows.length > 0 && React.createElement("div", { className: "tablewrap" }, React.createElement("table", null,
+      React.createElement("thead", null, React.createElement("tr", null,
+        React.createElement("th", null, "Name"), React.createElement("th", null, "Phone"), React.createElement("th", null, "City"),
+        React.createElement("th", null, "Clinic"), React.createElement("th", null, "Link"), React.createElement("th", null, "Note"),
+        React.createElement("th", null, "Status"), React.createElement("th", null, "Action"))),
+      React.createElement("tbody", null, rows.map(Row)))));
 }
 
 function VideoCallsPanel({ rows, loading, onRefresh, onSave }) {
   const [openId, setOpenId] = useState(null);
   const [link, setLink] = useState("");
   const [note, setNote] = useState("");
-  const pending = rows.filter(v => v.status === "pending" || !v.status);
-  const scheduled = rows.filter(v => v.status === "scheduled");
-  const done = rows.filter(v => v.status === "done");
   const openRow = id => { const row = rows.find(v => v.id === id); setOpenId(id); setLink(row && row.meet_link || ""); setNote(row && row.admin_note || ""); };
   const submit = status => { onSave(openId, link, note, status); setOpenId(null); };
-  const Row = v => React.createElement("div", { key: v.id, className: "ltab", style: { display: "flex", alignItems: "flex-start", gap: 12, width: "100%", cursor: "pointer", padding: "10px 12px" }, onClick: () => openRow(v.id) },
-    React.createElement("div", { style: { flex: 1, minWidth: 0 } },
-      React.createElement("div", { style: { fontWeight: 600 } }, v.name || "Unnamed"),
-      React.createElement("div", { style: { fontSize: 13 } }, v.phone),
-      v.preferred_time && React.createElement("div", { style: { fontSize: 12, opacity: 0.7, marginTop: 2 } }, "Prefers: ", v.preferred_time),
-      v.note && React.createElement("div", { style: { fontSize: 12, opacity: 0.7, marginTop: 2 } }, "\u201C", v.note, "\u201D"),
-      React.createElement("div", { style: { fontSize: 11, opacity: 0.5, marginTop: 2 } }, v.created_at ? new Date(v.created_at).toLocaleString() : "")),
-    React.createElement("span", { className: "pill" }, v.status === "done" ? "Done" : v.status === "scheduled" ? "Scheduled" : "New"));
+  const Row = v => React.createElement("tr", { key: v.id, style: { cursor: "pointer" }, onClick: () => openRow(v.id) },
+    React.createElement("td", null, v.name || "Unnamed"),
+    React.createElement("td", null, v.phone || "\u2014"),
+    React.createElement("td", null, v.preferred_time || "\u2014"),
+    React.createElement("td", null, v.note || "\u2014"),
+    React.createElement("td", null, React.createElement("span", { className: "pill" }, v.status === "done" ? "Done" : v.status === "scheduled" ? "Scheduled" : "New")));
   return React.createElement("div", { style: { padding: 16 } },
     React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 } },
-      React.createElement("strong", null, "Video Calls"),
-      React.createElement("button", { className: "btn", onClick: onRefresh }, "Refresh")),
+      React.createElement("strong", null, "Video Calls"), React.createElement("button", { className: "btn", onClick: onRefresh }, "Refresh")),
     loading && React.createElement("div", null, "Loading\u2026"),
     !loading && rows.length === 0 && React.createElement("div", { style: { opacity: 0.6 } }, "No requests yet."),
-    pending.length > 0 && React.createElement("div", { style: { marginBottom: 18 } },
-      React.createElement("div", { style: { fontSize: 12, fontWeight: 700, textTransform: "uppercase", opacity: 0.6, marginBottom: 6 } }, "New (", pending.length, ")"), pending.map(Row)),
-    scheduled.length > 0 && React.createElement("div", { style: { marginBottom: 18 } },
-      React.createElement("div", { style: { fontSize: 12, fontWeight: 700, textTransform: "uppercase", opacity: 0.6, marginBottom: 6 } }, "Scheduled (", scheduled.length, ")"), scheduled.map(Row)),
-    done.length > 0 && React.createElement("div", null,
-      React.createElement("div", { style: { fontSize: 12, fontWeight: 700, textTransform: "uppercase", opacity: 0.6, marginBottom: 6 } }, "Done (", done.length, ")"), done.map(Row)),
+    rows.length > 0 && React.createElement("div", { className: "tablewrap" }, React.createElement("table", null,
+      React.createElement("thead", null, React.createElement("tr", null,
+        React.createElement("th", null, "Name"), React.createElement("th", null, "Phone"), React.createElement("th", null, "Preferred time"),
+        React.createElement("th", null, "Note"), React.createElement("th", null, "Status"))),
+      React.createElement("tbody", null, rows.map(Row)))),
     openId && (() => {
       const row = rows.find(v => v.id === openId);
       if (!row) return null;
@@ -2593,309 +2592,71 @@ function VideoCallsPanel({ rows, loading, onRefresh, onSave }) {
     })());
 }
 
-function EstimatesPanel({
-  estimates,
-  loading,
-  onRefresh,
-  onSend
-}) {
+function EstimatesPanel({ estimates, loading, onRefresh, onSend }) {
   const [openId, setOpenId] = useState(null);
   const [grafts, setGrafts] = useState("");
   const [note, setNote] = useState("");
-  const pending = estimates.filter(e => e.status === "pending");
-  const sent = estimates.filter(e => e.status === "sent");
-  const openRow = id => {
-    const row = estimates.find(e => e.id === id);
-    setOpenId(id);
-    setGrafts(row?.estimated_grafts || "");
-    setNote(row?.admin_note || "");
-  };
-  const submit = () => {
-    if (!grafts) return;
-    onSend(openId, Number(grafts), note);
-    setOpenId(null);
-  };
-  const Row = e => /*#__PURE__*/React.createElement("div", {
-    key: e.id,
-    className: "ltab",
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 12,
-      width: "100%",
-      cursor: "pointer",
-      padding: "10px 12px"
-    },
-    onClick: () => openRow(e.id)
-  }, /*#__PURE__*/React.createElement("div", {
-    style: { position: "relative", flexShrink: 0 }
-  }, /*#__PURE__*/React.createElement("img", {
-    src: e.photo_url,
-    alt: "",
-    style: {
-      width: 44,
-      height: 44,
-      borderRadius: 8,
-      objectFit: "cover"
-    }
-  }), e.photo_urls && e.photo_urls.length > 1 && /*#__PURE__*/React.createElement("span", {
-    style: {
-      position: "absolute", bottom: -4, right: -4,
-      background: "#292524", color: "#fff", fontSize: 9, fontWeight: 700,
-      borderRadius: 8, padding: "1px 4px"
-    }
-  }, "+", e.photo_urls.length - 1)), /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1,
-      minWidth: 0
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontWeight: 600
-    }
-  }, e.name || "Unnamed"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      opacity: 0.7
-    }
-  }, e.phone, " · ", e.tier)), e.status === "pending" ? /*#__PURE__*/React.createElement("span", {
-    className: "pill"
-  }, "Pending") : /*#__PURE__*/React.createElement("span", {
-    className: "pill"
-  }, "Sent · ", e.estimated_grafts));
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: 16
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 12
-    }
-  }, /*#__PURE__*/React.createElement("strong", null, "Graft Estimate Requests"), /*#__PURE__*/React.createElement("button", {
-    className: "btn",
-    onClick: onRefresh
-  }, "Refresh")), loading && /*#__PURE__*/React.createElement("div", null, "Loading…"), !loading && estimates.length === 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      opacity: 0.6
-    }
-  }, "No requests yet."), pending.length > 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginBottom: 18
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      fontWeight: 700,
-      textTransform: "uppercase",
-      opacity: 0.6,
-      marginBottom: 6
-    }
-  }, "Pending (", pending.length, ")"), pending.map(Row)), sent.length > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      fontWeight: 700,
-      textTransform: "uppercase",
-      opacity: 0.6,
-      marginBottom: 6
-    }
-  }, "Sent (", sent.length, ")"), sent.map(Row)), openId && (() => {
-    const row = estimates.find(e => e.id === openId);
-    if (!row) return null;
-    return /*#__PURE__*/React.createElement("div", {
-      style: {
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,.4)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 50
-      },
-      onClick: () => setOpenId(null)
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        background: "#fff",
-        borderRadius: 12,
-        padding: 20,
-        width: 360,
-        maxWidth: "92vw"
-      },
-      onClick: e => e.stopPropagation()
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "grid",
-        gridTemplateColumns: (row.photo_urls && row.photo_urls.length > 1) ? "1fr 1fr" : "1fr",
-        gap: 6,
-        marginBottom: 12
-      }
-    }, (row.photo_urls && row.photo_urls.length > 0 ? row.photo_urls : [row.photo_url]).filter(Boolean).map((url, i) => /*#__PURE__*/React.createElement("img", {
-      key: i,
-      src: url,
-      alt: "",
-      style: {
-        width: "100%",
-        height: (row.photo_urls && row.photo_urls.length > 1) ? 140 : 220,
-        objectFit: "cover",
-        borderRadius: 8,
-        cursor: "pointer"
-      },
-      onClick: () => window.open(url, "_blank")
-    }))), /*#__PURE__*/React.createElement("div", {
-      style: {
-        marginBottom: 4
-      }
-    }, /*#__PURE__*/React.createElement("strong", null, row.name), " · ", row.phone), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 12,
-        opacity: 0.7,
-        marginBottom: 12
-      }
-    }, "Tier: ", row.tier), /*#__PURE__*/React.createElement("label", {
-      style: {
-        fontSize: 12,
-        fontWeight: 600
-      }
-    }, "Estimated grafts"), /*#__PURE__*/React.createElement("input", {
-      type: "number",
-      value: grafts,
-      onChange: e => setGrafts(e.target.value),
-      style: {
-        width: "100%",
-        padding: 8,
-        marginTop: 4,
-        marginBottom: 10,
-        borderRadius: 6,
-        border: "1px solid #ccc"
-      }
-    }), /*#__PURE__*/React.createElement("label", {
-      style: {
-        fontSize: 12,
-        fontWeight: 600
-      }
-    }, "Note (optional, shown to customer)"), /*#__PURE__*/React.createElement("textarea", {
-      value: note,
-      onChange: e => setNote(e.target.value),
-      rows: 3,
-      style: {
-        width: "100%",
-        padding: 8,
-        marginTop: 4,
-        marginBottom: 12,
-        borderRadius: 6,
-        border: "1px solid #ccc"
-      }
-    }), /*#__PURE__*/React.createElement("button", {
-      className: "btn primary",
-      style: {
-        width: "100%"
-      },
-      onClick: submit,
-      disabled: !grafts
-    }, row.status === "sent" ? "Update Estimate" : "Send Estimate")));
-  })());
+  const openRow = id => { const row = estimates.find(e => e.id === id); setOpenId(id); setGrafts(row && row.estimated_grafts || ""); setNote(row && row.admin_note || ""); };
+  const submit = () => { if (!grafts) return; onSend(openId, Number(grafts), note); setOpenId(null); };
+  const Row = e => React.createElement("tr", { key: e.id, style: { cursor: "pointer" }, onClick: () => openRow(e.id) },
+    React.createElement("td", null, e.photo_url ? React.createElement("img", { src: e.photo_url, alt: "", style: { width: 40, height: 40, borderRadius: 6, objectFit: "cover" } }) : "\u2014"),
+    React.createElement("td", null, e.name || "Unnamed"),
+    React.createElement("td", null, e.phone || "\u2014"),
+    React.createElement("td", null, e.tier || "\u2014"),
+    React.createElement("td", null, e.status === "pending" ? React.createElement("span", { className: "pill" }, "Pending") : React.createElement("span", { className: "pill" }, "Sent \u00B7 ", e.estimated_grafts)));
+  return React.createElement("div", { style: { padding: 16 } },
+    React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 } },
+      React.createElement("strong", null, "Graft Estimate Requests"), React.createElement("button", { className: "btn", onClick: onRefresh }, "Refresh")),
+    loading && React.createElement("div", null, "Loading\u2026"),
+    !loading && estimates.length === 0 && React.createElement("div", { style: { opacity: 0.6 } }, "No requests yet."),
+    estimates.length > 0 && React.createElement("div", { className: "tablewrap" }, React.createElement("table", null,
+      React.createElement("thead", null, React.createElement("tr", null,
+        React.createElement("th", null, "Photo"), React.createElement("th", null, "Name"), React.createElement("th", null, "Phone"),
+        React.createElement("th", null, "Tier"), React.createElement("th", null, "Status"))),
+      React.createElement("tbody", null, estimates.map(Row)))),
+    openId && (() => {
+      const row = estimates.find(e => e.id === openId);
+      if (!row) return null;
+      return React.createElement("div", { style: { position: "fixed", inset: 0, background: "rgba(0,0,0,.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50 }, onClick: () => setOpenId(null) },
+        React.createElement("div", { style: { background: "#fff", borderRadius: 12, padding: 20, width: 360, maxWidth: "92vw" }, onClick: e => e.stopPropagation() },
+          React.createElement("div", { style: { display: "grid", gridTemplateColumns: (row.photo_urls && row.photo_urls.length > 1) ? "1fr 1fr" : "1fr", gap: 6, marginBottom: 12 } },
+            (row.photo_urls && row.photo_urls.length > 0 ? row.photo_urls : [row.photo_url]).filter(Boolean).map((url, i) => React.createElement("img", { key: i, src: url, alt: "", style: { width: "100%", height: (row.photo_urls && row.photo_urls.length > 1) ? 140 : 220, objectFit: "cover", borderRadius: 8, cursor: "pointer" }, onClick: () => window.open(url, "_blank") }))),
+          React.createElement("div", { style: { marginBottom: 4 } }, React.createElement("strong", null, row.name), " \u00B7 ", row.phone),
+          React.createElement("div", { style: { fontSize: 12, opacity: 0.7, marginBottom: 12 } }, "Tier: ", row.tier),
+          React.createElement("label", { style: { fontSize: 12, fontWeight: 600 } }, "Estimated grafts"),
+          React.createElement("input", { type: "number", value: grafts, onChange: e => setGrafts(e.target.value), style: { width: "100%", padding: 8, marginTop: 4, marginBottom: 10, borderRadius: 6, border: "1px solid #ccc" } }),
+          React.createElement("label", { style: { fontSize: 12, fontWeight: 600 } }, "Note (optional, shown to customer)"),
+          React.createElement("textarea", { value: note, onChange: e => setNote(e.target.value), rows: 3, style: { width: "100%", padding: 8, marginTop: 4, marginBottom: 12, borderRadius: 6, border: "1px solid #ccc" } }),
+          React.createElement("button", { className: "btn primary", style: { width: "100%" }, onClick: submit, disabled: !grafts }, row.status === "sent" ? "Update Estimate" : "Send Estimate")));
+    })());
 }
 
-/* =========================================================================
-   CONTACTS PANEL  (Premium/Full buyers who shared name+phone for
-   WhatsApp/call follow-up — no owner number is ever shown publicly)
-   ========================================================================= */
-function ContactsPanel({
-  contacts,
-  loading,
-  onRefresh,
-  onMarkContacted
-}) {
-  const pending = contacts.filter(c => !c.contacted);
-  const done = contacts.filter(c => c.contacted);
-  const Row = c => /*#__PURE__*/React.createElement("div", {
-    key: c.id,
-    className: "ltab",
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 12,
-      width: "100%",
-      padding: "10px 12px"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1,
-      minWidth: 0
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontWeight: 600
-    }
-  }, c.contact_name || "Unnamed", " · ", /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontWeight: 400,
-      opacity: 0.7
-    }
-  }, c.tier)), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 13
-    }
-  }, c.contact_phone), c.call_note && /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      opacity: 0.7,
-      marginTop: 2
-    }
-  }, "\u201C", c.call_note, "\u201D"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      opacity: 0.5,
-      marginTop: 2
-    }
-  }, c.call_requested_at ? new Date(c.call_requested_at).toLocaleString() : "")), !c.contacted && /*#__PURE__*/React.createElement("button", {
-    className: "btn",
-    onClick: () => onMarkContacted(c.id)
-  }, "Mark contacted"), c.contacted && /*#__PURE__*/React.createElement("span", {
-    className: "pill"
-  }, "Contacted"));
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: 16
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 12
-    }
-  }, /*#__PURE__*/React.createElement("strong", null, "Contact Requests"), /*#__PURE__*/React.createElement("button", {
-    className: "btn",
-    onClick: onRefresh
-  }, "Refresh")), loading && /*#__PURE__*/React.createElement("div", null, "Loading…"), !loading && contacts.length === 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      opacity: 0.6
-    }
-  }, "No requests yet."), pending.length > 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginBottom: 18
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      fontWeight: 700,
-      textTransform: "uppercase",
-      opacity: 0.6,
-      marginBottom: 6
-    }
-  }, "To contact (", pending.length, ")"), pending.map(Row)), done.length > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      fontWeight: 700,
-      textTransform: "uppercase",
-      opacity: 0.6,
-      marginBottom: 6
-    }
-  }, "Contacted (", done.length, ")"), done.map(Row)));
+function ContactsPanel({ contacts, loading, onRefresh, onMarkContacted }) {
+  const Row = c => {
+    const d = (c.contact_phone || "").replace(/\D/g, "");
+    const wa = "https://wa.me/" + (d.length === 10 ? "91" + d : d);
+    return React.createElement("tr", { key: c.id },
+      React.createElement("td", null, c.contact_name || "Unnamed"),
+      React.createElement("td", null, c.contact_phone || "\u2014"),
+      React.createElement("td", null, c.tier || "\u2014"),
+      React.createElement("td", null, c.call_note || "\u2014"),
+      React.createElement("td", null, c.call_requested_at ? new Date(c.call_requested_at).toLocaleString() : "\u2014"),
+      React.createElement("td", null, React.createElement("div", { style: { display: "flex", gap: 6 } },
+        c.contacted ? React.createElement("span", { className: "pill" }, "Contacted") : React.createElement("button", { className: "btn", onClick: () => onMarkContacted(c.id) }, "Mark contacted"),
+        React.createElement("a", { className: "btn", href: wa, target: "_blank", rel: "noreferrer", style: { display: "inline-flex", alignItems: "center", gap: 5, color: "#128C7E", fontWeight: 600 } }, I.whatsapp, "WhatsApp"))));
+  };
+  return React.createElement("div", { style: { padding: 16 } },
+    React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 } },
+      React.createElement("strong", null, "Contact Requests"), React.createElement("button", { className: "btn", onClick: onRefresh }, "Refresh")),
+    loading && React.createElement("div", null, "Loading\u2026"),
+    !loading && contacts.length === 0 && React.createElement("div", { style: { opacity: 0.6 } }, "No requests yet."),
+    contacts.length > 0 && React.createElement("div", { className: "tablewrap" }, React.createElement("table", null,
+      React.createElement("thead", null, React.createElement("tr", null,
+        React.createElement("th", null, "Name"), React.createElement("th", null, "Phone"), React.createElement("th", null, "Tier"),
+        React.createElement("th", null, "Note"), React.createElement("th", null, "Requested"), React.createElement("th", null, "Action"))),
+      React.createElement("tbody", null, contacts.map(Row)))));
 }
+
 
 /* =========================================================================
    RECORDS TABLE  (just name + phone; move to Booked when ready)
