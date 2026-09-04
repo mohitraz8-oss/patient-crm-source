@@ -1093,6 +1093,24 @@ const db = {
       contacted: true
     }).eq("id", id);
     if (error) throw error;
+  },
+  async loadClinicChecks() {
+    const { data, error } = await sb.from("clinic_checks").select("*").order("created_at", { ascending: false });
+    if (error) throw error;
+    return data;
+  },
+  async reviewClinicCheck(id, note) {
+    const { error } = await sb.from("clinic_checks").update({ status: "reviewed", admin_note: note || "", responded_at: new Date().toISOString() }).eq("id", id);
+    if (error) throw error;
+  },
+  async loadVideoCalls() {
+    const { data, error } = await sb.from("video_calls").select("*").order("created_at", { ascending: false });
+    if (error) throw error;
+    return data;
+  },
+  async scheduleVideoCall(id, meetLink, note, status) {
+    const { error } = await sb.from("video_calls").update({ meet_link: meetLink || "", admin_note: note || "", status: status || "scheduled", responded_at: new Date().toISOString() }).eq("id", id);
+    if (error) throw error;
   }
 };
 
@@ -1640,6 +1658,12 @@ function App({
   const [contacts, setContacts] = useState([]);
   const [contactsLoading, setContactsLoading] = useState(false);
   const [contactsLoaded, setContactsLoaded] = useState(false);
+  const [clinicChecks, setClinicChecks] = useState([]);
+  const [clinicChecksLoading, setClinicChecksLoading] = useState(false);
+  const [clinicChecksLoaded, setClinicChecksLoaded] = useState(false);
+  const [videoCalls, setVideoCalls] = useState([]);
+  const [videoCallsLoading, setVideoCallsLoading] = useState(false);
+  const [videoCallsLoaded, setVideoCallsLoaded] = useState(false);
   const toast = useCallback(text => {
     const id = mid();
     setToasts(t => [...t, {
@@ -1743,6 +1767,8 @@ function App({
     setSel(new Set());
     if (w === "estimates" && !estimatesLoaded) loadEstimates();
     if (w === "contacts" && !contactsLoaded) loadContacts();
+    if (w === "clinic_checks" && !clinicChecksLoaded) loadClinicChecks();
+    if (w === "video_calls" && !videoCallsLoaded) loadVideoCalls();
   };
   const loadEstimates = useCallback(async () => {
     setEstimatesLoading(true);
@@ -1793,6 +1819,28 @@ function App({
     }
   };
   const pendingContactsCount = contacts.filter(c => !c.contacted).length;
+  const loadClinicChecks = useCallback(async () => {
+    setClinicChecksLoading(true);
+    try { const rows = await db.loadClinicChecks(); setClinicChecks(rows); setClinicChecksLoaded(true); }
+    catch (e) { toast("Could not load clinic checks — " + (e.message || e)); }
+    setClinicChecksLoading(false);
+  }, [toast]);
+  const reviewClinicCheck = async (id, note) => {
+    try { await db.reviewClinicCheck(id, note); setClinicChecks(cs => cs.map(c => c.id === id ? { ...c, status: "reviewed", admin_note: note } : c)); toast("Marked reviewed"); }
+    catch (e) { toast("Could not update — " + (e.message || e)); }
+  };
+  const pendingClinicChecksCount = clinicChecks.filter(c => c.status !== "reviewed").length;
+  const loadVideoCalls = useCallback(async () => {
+    setVideoCallsLoading(true);
+    try { const rows = await db.loadVideoCalls(); setVideoCalls(rows); setVideoCallsLoaded(true); }
+    catch (e) { toast("Could not load video calls — " + (e.message || e)); }
+    setVideoCallsLoading(false);
+  }, [toast]);
+  const scheduleVideoCall = async (id, meetLink, note, status) => {
+    try { await db.scheduleVideoCall(id, meetLink, note, status); setVideoCalls(vs => vs.map(v => v.id === id ? { ...v, meet_link: meetLink, admin_note: note, status: status || "scheduled" } : v)); toast("Saved"); }
+    catch (e) { toast("Could not update — " + (e.message || e)); }
+  };
+  const pendingVideoCallsCount = videoCalls.filter(v => v.status === "pending" || !v.status).length;
   const addClinic = async name => {
     if (!name.trim() || clinicLocations[name]) return;
     setAddClinicOpen(false);
@@ -2333,7 +2381,17 @@ function App({
     onClick: () => switchWorkflow("contacts")
   }, "Contact Requests ", pendingContactsCount > 0 && /*#__PURE__*/React.createElement("span", {
     className: "pill"
-  }, pendingContactsCount)), activeWorkflow !== "estimates" && activeWorkflow !== "contacts" && /*#__PURE__*/React.createElement("button", {
+  }, pendingContactsCount)), /*#__PURE__*/React.createElement("button", {
+    className: "wftab" + (activeWorkflow === "clinic_checks" ? " on" : ""),
+    onClick: () => switchWorkflow("clinic_checks")
+  }, "Clinic Checks ", pendingClinicChecksCount > 0 && /*#__PURE__*/React.createElement("span", {
+    className: "pill"
+  }, pendingClinicChecksCount)), /*#__PURE__*/React.createElement("button", {
+    className: "wftab" + (activeWorkflow === "video_calls" ? " on" : ""),
+    onClick: () => switchWorkflow("video_calls")
+  }, "Video Calls ", pendingVideoCallsCount > 0 && /*#__PURE__*/React.createElement("span", {
+    className: "pill"
+  }, pendingVideoCallsCount)), (activeWorkflow === "record" || activeWorkflow === "booked") && /*#__PURE__*/React.createElement("button", {
     className: "btn primary",
     onClick: addBlank
   }, I.plus, " ", activeWorkflow === "record" ? "Add record" : "Add booked patient")), activeWorkflow === "estimates" ? /*#__PURE__*/React.createElement(EstimatesPanel, {
@@ -2346,6 +2404,16 @@ function App({
     loading: contactsLoading,
     onRefresh: loadContacts,
     onMarkContacted: markContacted
+  }) : activeWorkflow === "clinic_checks" ? /*#__PURE__*/React.createElement(ClinicChecksPanel, {
+    rows: clinicChecks,
+    loading: clinicChecksLoading,
+    onRefresh: loadClinicChecks,
+    onReview: reviewClinicCheck
+  }) : activeWorkflow === "video_calls" ? /*#__PURE__*/React.createElement(VideoCallsPanel, {
+    rows: videoCalls,
+    loading: videoCallsLoading,
+    onRefresh: loadVideoCalls,
+    onSave: scheduleVideoCall
   }) : activeWorkflow === "booked" ? /*#__PURE__*/React.createElement(BookedTable, {
     patients: scoped,
     editingId: editingId,
@@ -2455,6 +2523,76 @@ function App({
 /* =========================================================================
    ESTIMATES PANEL  (graft-estimate requests from the Hair Transplant Guide)
    ========================================================================= */
+function ClinicChecksPanel({ rows, loading, onRefresh, onReview }) {
+  const pending = rows.filter(c => c.status !== "reviewed");
+  const done = rows.filter(c => c.status === "reviewed");
+  const Row = c => React.createElement("div", { key: c.id, className: "ltab", style: { display: "flex", alignItems: "flex-start", gap: 12, width: "100%", padding: "10px 12px" } },
+    React.createElement("div", { style: { flex: 1, minWidth: 0 } },
+      React.createElement("div", { style: { fontWeight: 600 } }, c.name || "Unnamed"),
+      React.createElement("div", { style: { fontSize: 13 } }, c.phone, c.city ? " \u00B7 " + c.city : ""),
+      c.clinic && React.createElement("div", { style: { fontSize: 13, marginTop: 2 } }, "Clinic: ", c.clinic),
+      c.clinic_link && React.createElement("a", { href: c.clinic_link, target: "_blank", rel: "noreferrer", style: { fontSize: 13, color: "#047857", wordBreak: "break-all" } }, c.clinic_link),
+      c.note && React.createElement("div", { style: { fontSize: 12, opacity: 0.7, marginTop: 2 } }, "\u201C", c.note, "\u201D"),
+      React.createElement("div", { style: { fontSize: 11, opacity: 0.5, marginTop: 2 } }, c.created_at ? new Date(c.created_at).toLocaleString() : "")),
+    c.status !== "reviewed" ? React.createElement("button", { className: "btn", onClick: () => onReview(c.id, "") }, "Mark reviewed") : React.createElement("span", { className: "pill" }, "Reviewed"));
+  return React.createElement("div", { style: { padding: 16 } },
+    React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 } },
+      React.createElement("strong", null, "Clinic Checks"),
+      React.createElement("button", { className: "btn", onClick: onRefresh }, "Refresh")),
+    loading && React.createElement("div", null, "Loading\u2026"),
+    !loading && rows.length === 0 && React.createElement("div", { style: { opacity: 0.6 } }, "No requests yet."),
+    pending.length > 0 && React.createElement("div", { style: { marginBottom: 18 } },
+      React.createElement("div", { style: { fontSize: 12, fontWeight: 700, textTransform: "uppercase", opacity: 0.6, marginBottom: 6 } }, "To review (", pending.length, ")"), pending.map(Row)),
+    done.length > 0 && React.createElement("div", null,
+      React.createElement("div", { style: { fontSize: 12, fontWeight: 700, textTransform: "uppercase", opacity: 0.6, marginBottom: 6 } }, "Reviewed (", done.length, ")"), done.map(Row)));
+}
+
+function VideoCallsPanel({ rows, loading, onRefresh, onSave }) {
+  const [openId, setOpenId] = useState(null);
+  const [link, setLink] = useState("");
+  const [note, setNote] = useState("");
+  const pending = rows.filter(v => v.status === "pending" || !v.status);
+  const scheduled = rows.filter(v => v.status === "scheduled");
+  const done = rows.filter(v => v.status === "done");
+  const openRow = id => { const row = rows.find(v => v.id === id); setOpenId(id); setLink(row && row.meet_link || ""); setNote(row && row.admin_note || ""); };
+  const submit = status => { onSave(openId, link, note, status); setOpenId(null); };
+  const Row = v => React.createElement("div", { key: v.id, className: "ltab", style: { display: "flex", alignItems: "flex-start", gap: 12, width: "100%", cursor: "pointer", padding: "10px 12px" }, onClick: () => openRow(v.id) },
+    React.createElement("div", { style: { flex: 1, minWidth: 0 } },
+      React.createElement("div", { style: { fontWeight: 600 } }, v.name || "Unnamed"),
+      React.createElement("div", { style: { fontSize: 13 } }, v.phone),
+      v.preferred_time && React.createElement("div", { style: { fontSize: 12, opacity: 0.7, marginTop: 2 } }, "Prefers: ", v.preferred_time),
+      v.note && React.createElement("div", { style: { fontSize: 12, opacity: 0.7, marginTop: 2 } }, "\u201C", v.note, "\u201D"),
+      React.createElement("div", { style: { fontSize: 11, opacity: 0.5, marginTop: 2 } }, v.created_at ? new Date(v.created_at).toLocaleString() : "")),
+    React.createElement("span", { className: "pill" }, v.status === "done" ? "Done" : v.status === "scheduled" ? "Scheduled" : "New"));
+  return React.createElement("div", { style: { padding: 16 } },
+    React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 } },
+      React.createElement("strong", null, "Video Calls"),
+      React.createElement("button", { className: "btn", onClick: onRefresh }, "Refresh")),
+    loading && React.createElement("div", null, "Loading\u2026"),
+    !loading && rows.length === 0 && React.createElement("div", { style: { opacity: 0.6 } }, "No requests yet."),
+    pending.length > 0 && React.createElement("div", { style: { marginBottom: 18 } },
+      React.createElement("div", { style: { fontSize: 12, fontWeight: 700, textTransform: "uppercase", opacity: 0.6, marginBottom: 6 } }, "New (", pending.length, ")"), pending.map(Row)),
+    scheduled.length > 0 && React.createElement("div", { style: { marginBottom: 18 } },
+      React.createElement("div", { style: { fontSize: 12, fontWeight: 700, textTransform: "uppercase", opacity: 0.6, marginBottom: 6 } }, "Scheduled (", scheduled.length, ")"), scheduled.map(Row)),
+    done.length > 0 && React.createElement("div", null,
+      React.createElement("div", { style: { fontSize: 12, fontWeight: 700, textTransform: "uppercase", opacity: 0.6, marginBottom: 6 } }, "Done (", done.length, ")"), done.map(Row)),
+    openId && (() => {
+      const row = rows.find(v => v.id === openId);
+      if (!row) return null;
+      return React.createElement("div", { style: { position: "fixed", inset: 0, background: "rgba(0,0,0,.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50 }, onClick: () => setOpenId(null) },
+        React.createElement("div", { style: { background: "#fff", borderRadius: 12, padding: 20, width: 360, maxWidth: "92vw" }, onClick: e => e.stopPropagation() },
+          React.createElement("div", { style: { marginBottom: 4 } }, React.createElement("strong", null, row.name), " \u00B7 ", row.phone),
+          row.preferred_time && React.createElement("div", { style: { fontSize: 12, opacity: 0.7, marginBottom: 12 } }, "Prefers: ", row.preferred_time),
+          React.createElement("label", { style: { fontSize: 12, fontWeight: 600 } }, "Video call link (Google Meet / WhatsApp)"),
+          React.createElement("input", { value: link, onChange: e => setLink(e.target.value), placeholder: "https://\u2026", style: { width: "100%", padding: 8, marginTop: 4, marginBottom: 10, borderRadius: 6, border: "1px solid #ccc" } }),
+          React.createElement("label", { style: { fontSize: 12, fontWeight: 600 } }, "Private note (optional)"),
+          React.createElement("textarea", { value: note, onChange: e => setNote(e.target.value), rows: 2, style: { width: "100%", padding: 8, marginTop: 4, marginBottom: 12, borderRadius: 6, border: "1px solid #ccc" } }),
+          React.createElement("div", { style: { display: "flex", gap: 8 } },
+            React.createElement("button", { className: "btn primary", style: { flex: 1 }, onClick: () => submit("scheduled") }, "Save"),
+            React.createElement("button", { className: "btn", onClick: () => submit("done") }, "Mark done"))));
+    })());
+}
+
 function EstimatesPanel({
   estimates,
   loading,
