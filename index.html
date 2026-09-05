@@ -1115,6 +1115,10 @@ const db = {
   async scheduleVideoCall(id, meetLink, note, status) {
     const { error } = await sb.from("video_calls").update({ meet_link: meetLink || "", admin_note: note || "", status: status || "scheduled", responded_at: new Date().toISOString() }).eq("id", id);
     if (error) throw error;
+  },
+  async deleteVideoCall(id) {
+    const { error } = await sb.from("video_calls").delete().eq("id", id);
+    if (error) throw error;
   }
 };
 
@@ -1852,6 +1856,11 @@ function App({
     catch (e) { toast("Could not update — " + (e.message || e)); }
   };
   const pendingVideoCallsCount = videoCalls.filter(v => v.status === "pending" || !v.status).length;
+  const deleteVideoCall = async (id) => {
+    if (!window.confirm("Delete this video call? This cannot be undone.")) return;
+    try { await db.deleteVideoCall(id); setVideoCalls(vs => vs.filter(v => v.id !== id)); toast("Deleted"); }
+    catch (e) { toast("Could not delete — " + (e.message || e)); }
+  };
   const addClinic = async name => {
     if (!name.trim() || clinicLocations[name]) return;
     setAddClinicOpen(false);
@@ -2425,7 +2434,8 @@ function App({
     rows: videoCalls,
     loading: videoCallsLoading,
     onRefresh: loadVideoCalls,
-    onSave: scheduleVideoCall
+    onSave: scheduleVideoCall,
+    onDelete: deleteVideoCall
   }) : activeWorkflow === "booked" ? /*#__PURE__*/React.createElement(BookedTable, {
     patients: scoped,
     editingId: editingId,
@@ -2581,18 +2591,25 @@ function ClinicChecksPanel({ rows, loading, onRefresh, onReview, onDelete }) {
     })());
 }
 
-function VideoCallsPanel({ rows, loading, onRefresh, onSave }) {
+function VideoCallsPanel({ rows, loading, onRefresh, onSave, onDelete }) {
   const [openId, setOpenId] = useState(null);
   const [link, setLink] = useState("");
   const [note, setNote] = useState("");
   const openRow = id => { const row = rows.find(v => v.id === id); setOpenId(id); setLink(row && row.meet_link || ""); setNote(row && row.admin_note || ""); };
   const submit = status => { onSave(openId, link, note, status); setOpenId(null); };
-  const Row = v => React.createElement("tr", { key: v.id, style: { cursor: "pointer" }, onClick: () => openRow(v.id) },
-    React.createElement("td", null, v.name || "Unnamed"),
-    React.createElement("td", null, v.phone || "\u2014"),
-    React.createElement("td", null, v.preferred_time || "\u2014"),
-    React.createElement("td", null, v.note || "\u2014"),
-    React.createElement("td", null, React.createElement("span", { className: "pill" }, v.status === "done" ? "Done" : v.status === "scheduled" ? "Scheduled" : "New")));
+  const Row = v => {
+    const d = (v.phone || "").replace(/\D/g, "");
+    const wa = "https://wa.me/" + (d.length === 10 ? "91" + d : d);
+    return React.createElement("tr", { key: v.id, style: { cursor: "pointer" }, onClick: () => openRow(v.id) },
+      React.createElement("td", null, v.name || "Unnamed"),
+      React.createElement("td", null, v.phone || "\u2014"),
+      React.createElement("td", null, v.preferred_time || "\u2014"),
+      React.createElement("td", null, v.note || "\u2014"),
+      React.createElement("td", null, React.createElement("span", { className: "pill" }, v.status === "done" ? "Done" : v.status === "scheduled" ? "Scheduled" : "New")),
+      React.createElement("td", { onClick: e => e.stopPropagation() }, React.createElement("div", { style: { display: "flex", gap: 6 } },
+        React.createElement("a", { className: "btn sm warow", href: wa, target: "_blank", rel: "noreferrer", title: "WhatsApp" }, I.wa),
+        React.createElement("button", { className: "btn sm", style: { color: "#dc2626" }, onClick: () => onDelete(v.id), title: "Delete" }, I.trash))));
+  };
   return React.createElement("div", { style: { padding: 16 } },
     React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 } },
       React.createElement("strong", null, "Video Calls"), React.createElement("button", { className: "btn", onClick: onRefresh }, "Refresh")),
@@ -2601,7 +2618,7 @@ function VideoCallsPanel({ rows, loading, onRefresh, onSave }) {
     rows.length > 0 && React.createElement("div", { className: "tablewrap" }, React.createElement("table", null,
       React.createElement("thead", null, React.createElement("tr", null,
         React.createElement("th", null, "Name"), React.createElement("th", null, "Phone"), React.createElement("th", null, "Preferred time"),
-        React.createElement("th", null, "Note"), React.createElement("th", null, "Status"))),
+        React.createElement("th", null, "Note"), React.createElement("th", null, "Status"), React.createElement("th", null, "Action"))),
       React.createElement("tbody", null, rows.map(Row)))),
     openId && (() => {
       const row = rows.find(v => v.id === openId);
