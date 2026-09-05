@@ -2683,6 +2683,7 @@ function ContactsPanel({ contacts, loading, onRefresh, onMarkContacted }) {
     return React.createElement("tr", { key: c.id },
       React.createElement("td", null, c.contact_name || "Unnamed"),
       React.createElement("td", null, c.contact_phone || "\u2014"),
+      React.createElement("td", null, c.contact_city || "\u2014"),
       React.createElement("td", null, c.tier || "\u2014"),
       React.createElement("td", null, c.call_note || "\u2014"),
       React.createElement("td", null, c.call_requested_at ? new Date(c.call_requested_at).toLocaleString() : "\u2014"),
@@ -2697,7 +2698,7 @@ function ContactsPanel({ contacts, loading, onRefresh, onMarkContacted }) {
     !loading && contacts.length === 0 && React.createElement("div", { style: { opacity: 0.6 } }, "No requests yet."),
     contacts.length > 0 && React.createElement("div", { className: "tablewrap" }, React.createElement("table", null,
       React.createElement("thead", null, React.createElement("tr", null,
-        React.createElement("th", null, "Name"), React.createElement("th", null, "Phone"), React.createElement("th", null, "Tier"),
+        React.createElement("th", null, "Name"), React.createElement("th", null, "Phone"), React.createElement("th", null, "City"), React.createElement("th", null, "Tier"),
         React.createElement("th", null, "Note"), React.createElement("th", null, "Requested"), React.createElement("th", null, "Action"))),
       React.createElement("tbody", null, contacts.map(Row)))));
 }
