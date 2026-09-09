@@ -10,9 +10,9 @@
 <style>
 
   :root{
-    --bg:#EEF1F4;--surface:#FFFFFF;--surface-2:#F7F9FB;--ink:#0F1A24;--ink-2:#33424F;
-    --muted:#6B7A87;--line:#E3E8ED;--line-strong:#D3DBE2;
-    --primary:#0E7C6B;--primary-dark:#0A5C50;--primary-tint:#E2F2EE;
+    --bg:#FAFDF7;--surface:#FFFFFF;--surface-2:#F7F9FB;--ink:#1F1F1F;--ink-2:#33424F;
+    --muted:#7A7A7A;--line:#E7E7E7;--line-strong:#D6D6D6;
+    --primary:#B45309;--primary-dark:#92400E;--primary-tint:#FEF3C7;
     --amber-bg:#FDF0D5;--amber-fg:#96560A;--green-bg:#D8F3E4;--green-fg:#0A6A45;
     --red-bg:#FCE3E1;--red-fg:#AE2E22;--blue-bg:#DBEAFE;--blue-fg:#1B5FC4;
     --gray-bg:#EAEEF2;--gray-fg:#556472;
@@ -28,7 +28,7 @@
   ::selection{background:var(--primary-tint)}
 
   .app{max-width:1440px;margin:0 auto;padding:0 24px 80px}
-  .topbar{position:sticky;top:0;z-index:40;background:rgba(238,241,244,.92);backdrop-filter:saturate(140%) blur(8px);padding-top:15px;border-bottom:1px solid var(--line)}
+  .topbar{position:sticky;top:0;z-index:40;background:rgba(250,253,247,.92);backdrop-filter:saturate(140%) blur(8px);padding-top:15px;border-bottom:1px solid var(--line)}
   .topbar-in{display:flex;align-items:center;gap:14px;width:100%;padding-bottom:12px}
   .brand{display:flex;align-items:center;gap:11px}
   .logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(150deg,var(--primary),var(--primary-dark));display:grid;place-items:center;box-shadow:var(--shadow-sm);flex:none}
@@ -49,7 +49,7 @@
   .clinics{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .cpill{border:1px solid var(--line-strong);background:var(--surface);border-radius:20px;padding:7px 14px;font-size:13px;font-weight:600;color:var(--ink-2);display:flex;align-items:center;gap:7px}
   .cpill:hover{border-color:var(--muted)}
-  .cpill.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .cpill.on{background:var(--primary);border-color:var(--primary);color:#fff}
   .cpill .cnt{font-size:11px;font-weight:700;opacity:.7}
   .cpill.add{border-style:dashed;color:var(--muted);background:transparent}
   .cpill.add:hover{border-color:var(--primary);color:var(--primary-dark)}
@@ -68,7 +68,7 @@
   .wftabs{display:flex;gap:8px;margin:16px 0 14px}
   .wftab{border:1px solid var(--line-strong);background:var(--surface);border-radius:10px;padding:9px 16px;font-size:13.5px;font-weight:700;color:var(--ink-2);display:flex;align-items:center;gap:8px;box-shadow:var(--shadow-sm)}
   .wftab:hover{border-color:var(--muted)}
-  .wftab.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .wftab.on{background:var(--primary);border-color:var(--primary);color:#fff}
   .wftab .pill{background:var(--gray-bg);color:var(--gray-fg);font-size:11px;font-weight:700;padding:1px 8px;border-radius:20px}
   .wftab.on .pill{background:rgba(255,255,255,.25);color:#fff}
 
@@ -1779,6 +1779,7 @@ function App({
     if (w === "contacts" && !contactsLoaded) loadContacts();
     if (w === "clinic_checks" && !clinicChecksLoaded) loadClinicChecks();
     if (w === "video_calls" && !videoCallsLoaded) loadVideoCalls();
+    if (w === "requests") { if (!estimatesLoaded) loadEstimates(); if (!contactsLoaded) loadContacts(); if (!clinicChecksLoaded) loadClinicChecks(); if (!videoCallsLoaded) loadVideoCalls(); }
   };
   const loadEstimates = useCallback(async () => {
     setEstimatesLoading(true);
@@ -2392,29 +2393,18 @@ function App({
   }, counts.booked)), /*#__PURE__*/React.createElement("div", {
     className: "spacer"
   }), /*#__PURE__*/React.createElement("button", {
-    className: "wftab" + (activeWorkflow === "estimates" ? " on" : ""),
-    onClick: () => switchWorkflow("estimates")
-  }, "Graft Estimates ", pendingEstimatesCount > 0 && /*#__PURE__*/React.createElement("span", {
+    className: "wftab" + (["requests","estimates","contacts","clinic_checks","video_calls"].indexOf(activeWorkflow) >= 0 ? " on" : ""),
+    onClick: () => switchWorkflow("requests")
+  }, "Requests ", (pendingEstimatesCount + pendingContactsCount + pendingClinicChecksCount + pendingVideoCallsCount) > 0 && /*#__PURE__*/React.createElement("span", {
     className: "pill"
-  }, pendingEstimatesCount)), /*#__PURE__*/React.createElement("button", {
-    className: "wftab" + (activeWorkflow === "contacts" ? " on" : ""),
-    onClick: () => switchWorkflow("contacts")
-  }, "Contact Requests ", pendingContactsCount > 0 && /*#__PURE__*/React.createElement("span", {
-    className: "pill"
-  }, pendingContactsCount)), /*#__PURE__*/React.createElement("button", {
-    className: "wftab" + (activeWorkflow === "clinic_checks" ? " on" : ""),
-    onClick: () => switchWorkflow("clinic_checks")
-  }, "Clinic Checks ", pendingClinicChecksCount > 0 && /*#__PURE__*/React.createElement("span", {
-    className: "pill"
-  }, pendingClinicChecksCount)), /*#__PURE__*/React.createElement("button", {
-    className: "wftab" + (activeWorkflow === "video_calls" ? " on" : ""),
-    onClick: () => switchWorkflow("video_calls")
-  }, "Video Calls ", pendingVideoCallsCount > 0 && /*#__PURE__*/React.createElement("span", {
-    className: "pill"
-  }, pendingVideoCallsCount)), (activeWorkflow === "record" || activeWorkflow === "booked") && /*#__PURE__*/React.createElement("button", {
+  }, pendingEstimatesCount + pendingContactsCount + pendingClinicChecksCount + pendingVideoCallsCount)), (activeWorkflow === "record" || activeWorkflow === "booked") && /*#__PURE__*/React.createElement("button", {
     className: "btn primary",
     onClick: addBlank
-  }, I.plus, " ", activeWorkflow === "record" ? "Add record" : "Add booked patient")), activeWorkflow === "estimates" ? /*#__PURE__*/React.createElement(EstimatesPanel, {
+  }, I.plus, " ", activeWorkflow === "record" ? "Add record" : "Add booked patient")), activeWorkflow === "requests" ? /*#__PURE__*/React.createElement(RequestsInbox, {
+    estimates: estimates, contacts: contacts, clinicChecks: clinicChecks, videoCalls: videoCalls,
+    onOpen: switchWorkflow,
+    onRefresh: () => { loadEstimates(); loadContacts(); loadClinicChecks(); loadVideoCalls(); }
+  }) : activeWorkflow === "estimates" ? /*#__PURE__*/React.createElement(EstimatesPanel, {
     estimates: estimates,
     loading: estimatesLoading,
     onRefresh: loadEstimates,
@@ -2545,6 +2535,48 @@ function App({
 /* =========================================================================
    ESTIMATES PANEL  (graft-estimate requests from the Hair Transplant Guide)
    ========================================================================= */
+function RequestsInbox({ estimates, contacts, clinicChecks, videoCalls, onOpen, onRefresh }) {
+  const [ty, setTy] = useState("all");
+  const [tm, setTm] = useState("all");
+  const rows = [];
+  (estimates || []).forEach(e => rows.push({ id: "e" + e.id, wf: "estimates", type: "est", name: e.name || "Unnamed", phone: e.phone || "", summary: e.status === "sent" ? ("Estimate sent \u00B7 " + (e.estimated_grafts || 0)) : "Photo submitted", status: e.status === "sent" ? "Sent" : "Pending", ts: e.created_at }));
+  (contacts || []).forEach(c => rows.push({ id: "c" + c.id, wf: "contacts", type: "con", name: c.contact_name || "Unnamed", phone: c.contact_phone || "", summary: c.call_note || "Contact request", status: c.contacted ? "Contacted" : "New", ts: c.call_requested_at }));
+  (clinicChecks || []).forEach(c => rows.push({ id: "k" + c.id, wf: "clinic_checks", type: "cli", name: c.name || "Unnamed", phone: c.phone || "", summary: c.clinic || "Clinic check", status: c.status === "reviewed" ? "Reviewed" : "Pending", ts: c.created_at }));
+  (videoCalls || []).forEach(v => rows.push({ id: "v" + v.id, wf: "video_calls", type: "vid", name: v.name || "Unnamed", phone: v.phone || "", summary: v.preferred_time || v.note || "Video call", status: v.status === "done" ? "Done" : v.status === "scheduled" ? "Scheduled" : "New", ts: v.created_at }));
+  rows.sort((a, b) => new Date(b.ts || 0) - new Date(a.ts || 0));
+  const now = Date.now();
+  const inTime = r => { if (tm === "all") return true; if (!r.ts) return false; if (tm === "today") return new Date(r.ts).toDateString() === new Date().toDateString(); const days = (now - new Date(r.ts).getTime()) / 86400000; return days <= (tm === "week" ? 7 : 30); };
+  const timeSet = rows.filter(inTime);
+  const shown = timeSet.filter(r => ty === "all" || r.type === ty);
+  const TP = { est: ["Graft estimate", "#EAF3DE", "#3B6D11"], con: ["Contact", "#E6F1FB", "#0C447C"], cli: ["Clinic check", "#FAEEDA", "#854F0B"], vid: ["Video call", "#EEEDFE", "#3C3489"] };
+  const SP = { Pending: ["#FAEEDA", "#854F0B"], New: ["#F1EFE8", "#444441"], Reviewed: ["#EAF3DE", "#3B6D11"], Scheduled: ["#E6F1FB", "#0C447C"], Sent: ["#EAF3DE", "#3B6D11"], Contacted: ["#F1EFE8", "#444441"], Done: ["#EAF3DE", "#3B6D11"] };
+  const pill = (t, b, f) => React.createElement("span", { style: { background: b, color: f, fontSize: 11.5, fontWeight: 500, padding: "3px 10px", borderRadius: 20, whiteSpace: "nowrap" } }, t);
+  const TYPES = [["all", "All"], ["est", "Graft estimates"], ["con", "Contacts"], ["cli", "Clinic checks"], ["vid", "Video calls"]];
+  const TIMES = [["today", "Today"], ["week", "This week"], ["month", "This month"], ["all", "All time"]];
+  return React.createElement("div", { style: { padding: 16 } },
+    React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: 7, marginBottom: 12 } },
+      TYPES.map(([k, lbl]) => { const n = timeSet.filter(r => k === "all" || r.type === k).length; const on = ty === k;
+        return React.createElement("button", { key: k, onClick: () => setTy(k), style: { cursor: "pointer", fontFamily: "inherit", border: "1px solid " + (on ? "var(--primary)" : "var(--line)"), background: on ? "var(--primary)" : "var(--surface)", color: on ? "#fff" : "var(--ink)", padding: "6px 12px", borderRadius: 20, fontSize: 12.5, fontWeight: 500 } }, lbl + " ", React.createElement("span", { style: { opacity: .7 } }, n)); })),
+    React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 8, flexWrap: "wrap" } },
+      React.createElement("div", { style: { display: "flex", gap: 4, background: "var(--gray-bg)", padding: 3, borderRadius: 9 } },
+        TIMES.map(([k, lbl]) => { const on = tm === k;
+          return React.createElement("button", { key: k, onClick: () => setTm(k), style: { cursor: "pointer", fontFamily: "inherit", border: "none", background: on ? "var(--surface)" : "transparent", color: on ? "var(--primary)" : "var(--muted)", padding: "5px 11px", borderRadius: 7, fontSize: 12, fontWeight: 500 } }, lbl); })),
+      React.createElement("div", { style: { display: "flex", gap: 10, alignItems: "center" } },
+        React.createElement("span", { style: { fontSize: 12, color: "var(--muted)" } }, shown.length + " request" + (shown.length === 1 ? "" : "s")),
+        React.createElement("button", { className: "btn", onClick: onRefresh }, "Refresh"))),
+    shown.length === 0 ? React.createElement("div", { style: { padding: 22, color: "var(--muted)", fontSize: 13 } }, "No requests in this range.") :
+    React.createElement("div", { className: "tablewrap" }, React.createElement("table", null,
+      React.createElement("thead", null, React.createElement("tr", null,
+        React.createElement("th", null, "Type"), React.createElement("th", null, "Name"), React.createElement("th", null, "Phone"), React.createElement("th", null, "Details"), React.createElement("th", null, "Status"), React.createElement("th", null, "Action"))),
+      React.createElement("tbody", null, shown.map(r => React.createElement("tr", { key: r.id },
+        React.createElement("td", null, pill(TP[r.type][0], TP[r.type][1], TP[r.type][2])),
+        React.createElement("td", null, r.name),
+        React.createElement("td", null, r.phone || "\u2014"),
+        React.createElement("td", { style: { maxWidth: 280, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, r.summary),
+        React.createElement("td", null, pill(r.status, (SP[r.status] || ["#F1EFE8", "#444441"])[0], (SP[r.status] || ["#F1EFE8", "#444441"])[1])),
+        React.createElement("td", null, React.createElement("button", { className: "btn sm", style: { color: "var(--primary)", fontWeight: 500 }, onClick: () => onOpen(r.wf) }, "Open"))))))));
+}
+
 function ClinicChecksPanel({ rows, loading, onRefresh, onReview, onDelete }) {
   const [openId, setOpenId] = useState(null);
   const [comment, setComment] = useState("");
@@ -2559,8 +2591,8 @@ function ClinicChecksPanel({ rows, loading, onRefresh, onReview, onDelete }) {
       React.createElement("td", null, c.phone || "\u2014"),
       React.createElement("td", null, c.city || "\u2014"),
       React.createElement("td", null, c.clinic || "\u2014",
-        reviewed ? React.createElement("div", { onClick: () => openRow(c.id), title: "Click to edit", style: { fontSize: 12, color: "#047857", marginTop: 3, cursor: "pointer", textDecoration: "underline dotted" } }, c.admin_note ? ("Feedback: " + c.admin_note) : "+ Add feedback") : null),
-      React.createElement("td", null, c.clinic_link ? React.createElement("a", { href: c.clinic_link, target: "_blank", rel: "noreferrer", style: { color: "#047857" } }, "Open") : "\u2014"),
+        reviewed ? React.createElement("div", { onClick: () => openRow(c.id), title: "Click to edit", style: { fontSize: 12, color: "#B45309", marginTop: 3, cursor: "pointer", textDecoration: "underline dotted" } }, c.admin_note ? ("Feedback: " + c.admin_note) : "+ Add feedback") : null),
+      React.createElement("td", null, c.clinic_link ? React.createElement("a", { href: c.clinic_link, target: "_blank", rel: "noreferrer", style: { color: "#B45309" } }, "Open") : "\u2014"),
       React.createElement("td", null, React.createElement("span", { className: "pill" }, reviewed ? "Reviewed" : "Pending")),
       React.createElement("td", null, React.createElement("div", { style: { display: "flex", gap: 6 } },
         reviewed ? null : React.createElement("button", { className: "btn", onClick: () => openRow(c.id) }, "Mark reviewed"),
@@ -2584,7 +2616,7 @@ function ClinicChecksPanel({ rows, loading, onRefresh, onReview, onDelete }) {
         React.createElement("div", { style: { background: "#fff", borderRadius: 12, padding: 20, width: 380, maxWidth: "92vw" }, onClick: e => e.stopPropagation() },
           React.createElement("div", { style: { marginBottom: 4 } }, React.createElement("strong", null, row.name), " \u00B7 ", row.phone),
           row.clinic && React.createElement("div", { style: { fontSize: 13, marginBottom: 2 } }, "Clinic: ", row.clinic),
-          row.clinic_link && React.createElement("a", { href: row.clinic_link, target: "_blank", rel: "noreferrer", style: { fontSize: 13, color: "#047857", wordBreak: "break-all", display: "block", marginBottom: 10 } }, row.clinic_link),
+          row.clinic_link && React.createElement("a", { href: row.clinic_link, target: "_blank", rel: "noreferrer", style: { fontSize: 13, color: "#B45309", wordBreak: "break-all", display: "block", marginBottom: 10 } }, row.clinic_link),
           React.createElement("label", { style: { fontSize: 12, fontWeight: 600 } }, "Feedback (shown to the patient)"),
           React.createElement("textarea", { value: comment, onChange: e => setComment(e.target.value), rows: 4, placeholder: "e.g. I've talked to the clinic \u2014 they'll call you to discuss your discount.", style: { width: "100%", padding: 8, marginTop: 4, marginBottom: 12, borderRadius: 6, border: "1px solid #ccc" } }),
           React.createElement("button", { className: "btn primary", style: { width: "100%" }, onClick: submit }, row.status === "reviewed" ? "Save feedback" : "Save & mark reviewed")));
