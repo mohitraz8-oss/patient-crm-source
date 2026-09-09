@@ -372,12 +372,12 @@
   .stagepick svg{pointer-events:none;position:relative;z-index:1}
 
   /* ---- pinned left columns so names stay visible when scrolling sideways ---- */
-  th.stick,td.stick{position:sticky;z-index:3;background:var(--surface)}
-  th.stick{z-index:6;background:var(--surface-2)}
+  th.stick,td.stick{background:var(--surface)}
+  th.stick{background:var(--surface-2)}
   .stick.s0{left:0}
-  .stick.s1{left:0}
-  .stick.s2{left:36px;box-shadow:6px 0 8px -6px rgba(15,26,36,.16)}
-  th.stick.s2{box-shadow:6px 0 8px -6px rgba(15,26,36,.16), inset 0 -1px 0 var(--line)}
+  .stick.s1{}
+  .stick.s2{}
+  th.stick.s2{box-shadow:inset 0 -1px 0 var(--line)}
   /* sticky cells need their own background, so mirror each row tint */
   tr.row.stage-bd td.stick{background:#FFFCF4}
   tr.row.stage-sd td.stick{background:#F6F3FF}
