@@ -306,6 +306,8 @@
   /* ---- last message column ---- */
   th.lmcol{min-width:260px;width:100%}
   td.lmcol{white-space:normal}
+.bkt .lmcol{max-width:210px;width:210px;min-width:120px}
+.bkt td.lmcol .lastmsg{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;max-width:196px}
   .lastmsg{display:flex;flex-direction:column;gap:2px;cursor:default}
   .lm-body{display:flex;align-items:flex-start;gap:5px;font-size:12.5px;color:var(--ink-2);line-height:1.35}
   .lm-body>span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
@@ -3285,7 +3287,7 @@ function BookedTable({
     className: "card"
   }, /*#__PURE__*/React.createElement("div", {
     className: "tablewrap"
-  }, /*#__PURE__*/React.createElement("table", null, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
+  }, /*#__PURE__*/React.createElement("table", { className: "bkt" }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
     className: "stick s1 right",
     style: {
       width: 44
