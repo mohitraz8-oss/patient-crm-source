@@ -2561,7 +2561,7 @@ function FinancePanel({ patients }) {
   const earned = sum(pd), upcoming = sum(bd) + sum(ht), surgeries = ht.length + pd.length;
   const CF = [["all", "All clinics"]].concat(clinics.map(c => [c, c]));
   const TF = [["all", "All time"], ["year", "This year"], ["month", "This month"]];
-  const btn = (on, lbl, fn) => React.createElement("button", { onClick: fn, style: { cursor: "pointer", fontFamily: "inherit", border: "1px solid " + (on ? "var(--primary)" : "var(--line)"), background: on ? "var(--primary)" : "var(--surface)", color: on ? "#fff" : "var(--ink)", padding: "6px 13px", borderRadius: 9, fontSize: 13, fontWeight: 500 } }, lbl);
+  const btn = (on, lbl, fn) => React.createElement("button", { onClick: fn, style: { cursor: "pointer", fontFamily: "inherit", border: "1px solid " + (on ? "var(--primary)" : "var(--line)"), background: on ? "var(--primary)" : "var(--surface)", color: on ? "#fff" : "var(--ink)", padding: "5px 11px", borderRadius: 8, fontSize: 12.5, fontWeight: 500 } }, lbl);
   return React.createElement("div", { style: { padding: 16 } },
     React.createElement("div", { style: { display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 16 } },
       React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } }, CF.map(([k, l]) => React.createElement(React.Fragment, { key: k }, btn(clinic === k, l, () => setClinic(k))))),
@@ -2602,15 +2602,15 @@ function RequestsInbox({ estimates, contacts, clinicChecks, videoCalls, onOpen, 
   const TYPES = [["all", "All"], ["est", "Graft estimates"], ["con", "Contacts"], ["cli", "Clinic checks"], ["vid", "Video calls"]];
   const TIMES = [["today", "Today"], ["week", "This week"], ["month", "This month"], ["all", "All time"]];
   return React.createElement("div", { style: { padding: 16 } },
-    React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: 7, marginBottom: 12 } },
+    React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 12, flexWrap: "wrap" } },
+      React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: 7 } },
       TYPES.map(([k, lbl]) => { const n = timeSet.filter(r => k === "all" || r.type === k).length; const on = ty === k;
         return React.createElement("button", { key: k, onClick: () => setTy(k), style: { cursor: "pointer", fontFamily: "inherit", border: "1px solid " + (on ? "var(--primary)" : "var(--line)"), background: on ? "var(--primary)" : "var(--surface)", color: on ? "#fff" : "var(--ink)", padding: "5px 11px", borderRadius: 8, fontSize: 12.5, fontWeight: 500 } }, lbl + " ", React.createElement("span", { style: { opacity: .7 } }, n)); })),
-    React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 8, flexWrap: "wrap" } },
-      React.createElement("select", { value: tm, onChange: e => setTm(e.target.value), style: { border: "1px solid var(--line)", borderRadius: 9, padding: "7px 12px", fontSize: 12.5, color: "var(--ink)", background: "var(--surface)", fontFamily: "inherit", cursor: "pointer", fontWeight: 500 } }, TIMES.map(([k, lbl]) => React.createElement("option", { key: k, value: k }, lbl))),
       React.createElement("div", { style: { display: "flex", gap: 10, alignItems: "center" } },
         React.createElement("span", { style: { fontSize: 12, color: "var(--muted)" } }, shown.length + " request" + (shown.length === 1 ? "" : "s")),
+        React.createElement("select", { value: tm, onChange: e => setTm(e.target.value), style: { border: "1px solid var(--line)", borderRadius: 9, padding: "7px 12px", fontSize: 12.5, color: "var(--ink)", background: "var(--surface)", fontFamily: "inherit", cursor: "pointer", fontWeight: 500 } }, TIMES.map(([k, lbl]) => React.createElement("option", { key: k, value: k }, lbl))),
         React.createElement("button", { className: "btn", onClick: onRefresh }, "Refresh"))),
-    shown.length === 0 ? React.createElement("div", { style: { padding: 22, color: "var(--muted)", fontSize: 13 } }, "No requests in this range.") :
+    React.createElement("div", { style: { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 12, overflow: "hidden" } }, shown.length === 0 ? React.createElement("div", { style: { padding: 22, color: "var(--muted)", fontSize: 13 } }, "No requests in this range.") :
     React.createElement("div", { className: "tablewrap" }, React.createElement("table", null,
       React.createElement("thead", null, React.createElement("tr", null,
         React.createElement("th", null, "Type"), React.createElement("th", null, "Name"), React.createElement("th", null, "Phone"), React.createElement("th", null, "Details"), React.createElement("th", null, "Status"), React.createElement("th", null, "Action"))),
@@ -2620,7 +2620,7 @@ function RequestsInbox({ estimates, contacts, clinicChecks, videoCalls, onOpen, 
         React.createElement("td", null, r.phone || "\u2014"),
         React.createElement("td", { style: { maxWidth: 280, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, r.summary),
         React.createElement("td", null, pill(r.status, (SP[r.status] || ["#F1EFE8", "#444441"])[0], (SP[r.status] || ["#F1EFE8", "#444441"])[1])),
-        React.createElement("td", null, React.createElement("button", { className: "btn sm", style: { color: "var(--primary)", fontWeight: 500 }, onClick: () => onOpen(r.wf) }, "Open"))))))));
+        React.createElement("td", null, React.createElement("button", { className: "btn sm", style: { color: "var(--primary)", fontWeight: 500 }, onClick: () => onOpen(r.wf) }, "Open")))))))));
 }
 
 function ClinicChecksPanel({ rows, loading, onRefresh, onReview, onDelete }) {
