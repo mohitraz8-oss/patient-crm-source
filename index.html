@@ -2649,15 +2649,15 @@ function RequestsInbox({ estimates, contacts, clinicChecks, videoCalls, plans, o
   const fmtR = n => n >= 1e5 ? "₹" + (n / 1e5).toFixed(2) + " L" : "₹" + Math.round(n).toLocaleString("en-IN");
   const eN = tierN("essential"), pN = tierN("premium"), fN = tierN("full");
   const vN = (videoCalls || []).length, cN = (clinicChecks || []).length;
-  const tierEarn = t => (plans || []).filter(pp => pp.tier === t).reduce((a, pp) => a + (Number(pp.amount) || 0), 0);
-  const eE = tierEarn("essential"), pE = tierEarn("premium"), fE = tierEarn("full");
-  const planRev = eE + pE + fE;
+  const tierEarn = t => (plans || []).filter(pp => pp.tier === t).reduce((a, pp) => a + (Number(pp.amount) || 0), 0) / 100;
+  const eE = tierEarn("essential"), pE = tierEarn("premium"), fE = tierEarn("full"), vE = tierEarn("video_call"), cE = tierEarn("clinic_check");
+  const planRev = eE + pE + fE + vE + cE;
   const kpis = [
     { l: "Essential · ₹299", n: eN, s: fmtR(eE) + " earned", d: "#639922" },
     { l: "Premium · ₹699", n: pN, s: fmtR(pE) + " earned", d: "#B45309" },
     { l: "Full · ₹1,499", n: fN, s: fmtR(fE) + " earned", d: "#0C447C" },
-    { l: "Video call · ₹999", n: vN, s: fmtR(0) + " earned", d: "#3C3489" },
-    { l: "Clinic review · ₹499", n: cN, s: fmtR(0) + " earned", d: "#854F0B" }
+    { l: "Video call · ₹999", n: vN, s: fmtR(vE) + " earned", d: "#3C3489" },
+    { l: "Clinic review · ₹499", n: cN, s: fmtR(cE) + " earned", d: "#854F0B" }
   ];
   return React.createElement("div", { style: { padding: "16px 0" } },
     React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 12, marginBottom: 12 } }, kpis.map((c, i) => React.createElement("div", { key: i, style: { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 12, padding: "14px 16px" } }, React.createElement("div", { style: { fontSize: 11, fontWeight: 600, letterSpacing: ".04em", color: "var(--muted)", textTransform: "uppercase", display: "flex", alignItems: "center", gap: 7 } }, React.createElement("span", { style: { width: 8, height: 8, borderRadius: "50%", background: c.d } }), c.l), React.createElement("div", { style: { fontSize: 28, fontWeight: 600, margin: "7px 0 4px" } }, c.n), React.createElement("div", { style: { fontSize: 12.5, color: "#4B5563" } }, c.s)))),
