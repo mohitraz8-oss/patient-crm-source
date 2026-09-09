@@ -56,7 +56,7 @@
 
   /* location sub-tabs */
   .loctabs{display:flex;gap:2px;margin-top:12px;flex-wrap:wrap}
-  .ltab{border:none;background:transparent;padding:9px 15px;font-size:13.5px;font-weight:600;color:var(--muted);border-radius:9px 9px 0 0;position:relative;display:flex;align-items:center;gap:8px}
+  .ltab{border:none;background:transparent;padding:9px 15px;font-size:13.5px;font-weight:600;color:var(--muted);border-radius:9px 9px 0 0;position:relative;display:flex;align-items:center;gap:4px}
   .ltab:hover{color:var(--ink);background:rgba(255,255,255,.5)}
   .ltab.on{color:var(--primary-dark);background:var(--surface)}
   .ltab.on::after{content:"";position:absolute;left:12px;right:12px;bottom:-1px;height:2px;background:var(--primary)}
@@ -2347,7 +2347,7 @@ function App({
   }, I.pdf, " Export PDF"))), /*#__PURE__*/React.createElement("button", {
     className: "cpill add",
     title: session?.user?.email || "",
-    onClick: onSignOut
+    onClick: () => { if (window.confirm("Log out of the CRM?")) onSignOut(); }
   }, I.signout))), /*#__PURE__*/React.createElement("div", {
     className: "loctabs"
   }, (clinicLocations[activeClinic] || []).map(l => /*#__PURE__*/React.createElement("span", {
@@ -2376,7 +2376,7 @@ function App({
   }, I.trash)))), /*#__PURE__*/React.createElement("button", {
     className: "ltab add",
     onClick: () => setAddLocOpen(true)
-  }, I.plus, " Add location"))), /*#__PURE__*/React.createElement("div", {
+  }, I.plus, " Add new"))), /*#__PURE__*/React.createElement("div", {
     className: "content"
   }, /*#__PURE__*/React.createElement("div", {
     className: "wftabs"
@@ -2596,17 +2596,17 @@ function RequestsInbox({ estimates, contacts, clinicChecks, videoCalls, onOpen, 
   const now = Date.now();
   const inTime = r => { if (tm === "all") return true; if (!r.ts) return false; if (tm === "today") return new Date(r.ts).toDateString() === new Date().toDateString(); const days = (now - new Date(r.ts).getTime()) / 86400000; return days <= (tm === "week" ? 7 : 30); };
   const timeSet = rows.filter(inTime);
-  const shown = timeSet.filter(r => ty === "all" || r.type === ty);
+  const shown = timeSet.filter(r => ty === "all" ? true : ty === "disc" ? (r.type === "con" && /discount/i.test(r.summary || "")) : r.type === ty);
   const TP = { est: ["Graft estimate", "#EAF3DE", "#3B6D11"], con: ["Contact", "#E6F1FB", "#0C447C"], cli: ["Clinic check", "#FAEEDA", "#854F0B"], vid: ["Video call", "#EEEDFE", "#3C3489"] };
   const SP = { Pending: ["#FAEEDA", "#854F0B"], New: ["#F1EFE8", "#444441"], Reviewed: ["#EAF3DE", "#3B6D11"], Scheduled: ["#E6F1FB", "#0C447C"], Sent: ["#EAF3DE", "#3B6D11"], Contacted: ["#F1EFE8", "#444441"], Done: ["#EAF3DE", "#3B6D11"] };
   const pill = (t, b, f) => React.createElement("span", { style: { background: b, color: f, fontSize: 11.5, fontWeight: 500, padding: "3px 10px", borderRadius: 20, whiteSpace: "nowrap" } }, t);
-  const TYPES = [["all", "All"], ["est", "Graft estimates"], ["con", "Contacts"], ["cli", "Clinic checks"], ["vid", "Video calls"]];
+  const TYPES = [["all", "All"], ["est", "Graft estimates"], ["con", "Contacts"], ["disc", "Discounts"], ["cli", "Clinic checks"], ["vid", "Video calls"]];
   const TIMES = [["today", "Today"], ["week", "This week"], ["month", "This month"], ["all", "All time"]];
   return React.createElement("div", { style: { padding: "16px 0" } },
     React.createElement("div", { style: { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 12, overflow: "hidden" } },
     React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", padding: "12px 14px", borderBottom: "1px solid var(--line)" } },
       React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: 7 } },
-      TYPES.map(([k, lbl]) => { const n = timeSet.filter(r => k === "all" || r.type === k).length; const on = ty === k;
+      TYPES.map(([k, lbl]) => { const n = timeSet.filter(r => k === "all" ? true : k === "disc" ? (r.type === "con" && /discount/i.test(r.summary || "")) : r.type === k).length; const on = ty === k;
         return React.createElement("button", { key: k, onClick: () => setTy(k), style: { cursor: "pointer", fontFamily: "inherit", border: "1px solid " + (on ? "var(--primary)" : "var(--line)"), background: on ? "var(--primary)" : "var(--surface)", color: on ? "#fff" : "var(--ink)", padding: "5px 11px", borderRadius: 8, fontSize: 12.5, fontWeight: 500 } }, lbl + " ", React.createElement("span", { style: { opacity: .7 } }, n)); })),
       React.createElement("div", { style: { display: "flex", gap: 10, alignItems: "center" } },
         React.createElement("span", { style: { fontSize: 12, color: "var(--muted)" } }, shown.length + " request" + (shown.length === 1 ? "" : "s")),
