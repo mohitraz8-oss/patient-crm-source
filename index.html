@@ -81,11 +81,13 @@
   .dot{width:7px;height:7px;border-radius:50%;flex:none}
 
   .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-bottom:none;border-radius:var(--r) var(--r) 0 0;padding:11px 12px;margin-bottom:0}.toolbar+.card{border-top-left-radius:0;border-top-right-radius:0}
-  .search{position:relative;flex:1;min-width:200px}
+  .search{position:relative;flex:1;min-width:260px}
+input.cbx{display:none!important}
+th:has(input.cbx),td:has(input.cbx){display:none}
   .search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted)}
   .search input{width:100%;padding:9px 12px 9px 34px;border:1px solid var(--line-strong);border-radius:9px;background:var(--surface-2);outline:none;transition:.14s}
   .search input:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px var(--primary-tint)}
-  .filter select{appearance:none;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface-2);padding:8px 28px 8px 10px;font-weight:600;font-size:12.5px;outline:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7A87' stroke-width='2.4'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center}
+  .filter select{appearance:none;border:1px solid var(--line-strong);border-radius:9px;background:var(--surface-2);padding:9px 28px 9px 10px;font-weight:600;font-size:13px;outline:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7A87' stroke-width='2.4'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center}
 
   .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-sm);overflow:hidden}
   .tablewrap{overflow:auto;max-height:calc(100vh - 300px)}
@@ -2948,9 +2950,9 @@ function RecordsTable({
   }), /*#__PURE__*/React.createElement("button", {
     className: "btn sm wa",
     style: {
-      background: "#25D366",
+      background: "#B45309",
       border: "none",
-      color: "#06331b"
+      color: "#fff"
     },
     onClick: onImportOpen
   }, I.upload, " Add contacts")), /*#__PURE__*/React.createElement("div", {
