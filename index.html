@@ -2390,14 +2390,12 @@ function App({
     onClick: () => switchWorkflow("booked")
   }, "Booked ", /*#__PURE__*/React.createElement("span", {
     className: "pill"
-  }, counts.booked)), /*#__PURE__*/React.createElement("div", {
-    className: "spacer"
-  }), /*#__PURE__*/React.createElement("button", {
+  }, counts.booked)), /*#__PURE__*/React.createElement("button", {
     className: "wftab" + (["requests","estimates","contacts","clinic_checks","video_calls"].indexOf(activeWorkflow) >= 0 ? " on" : ""),
     onClick: () => switchWorkflow("requests")
   }, "Requests ", (pendingEstimatesCount + pendingContactsCount + pendingClinicChecksCount + pendingVideoCallsCount) > 0 && /*#__PURE__*/React.createElement("span", {
     className: "pill"
-  }, pendingEstimatesCount + pendingContactsCount + pendingClinicChecksCount + pendingVideoCallsCount)), /*#__PURE__*/React.createElement("button", { className: "wftab" + (activeWorkflow === "finance" ? " on" : ""), onClick: () => switchWorkflow("finance") }, "Finance"), (activeWorkflow === "record" || activeWorkflow === "booked") && /*#__PURE__*/React.createElement("button", {
+  }, pendingEstimatesCount + pendingContactsCount + pendingClinicChecksCount + pendingVideoCallsCount)), /*#__PURE__*/React.createElement("button", { className: "wftab" + (activeWorkflow === "finance" ? " on" : ""), onClick: () => switchWorkflow("finance") }, "Finance"), /*#__PURE__*/React.createElement("div", { className: "spacer" }), (activeWorkflow === "record" || activeWorkflow === "booked") && /*#__PURE__*/React.createElement("button", {
     className: "btn primary",
     onClick: addBlank
   }, I.plus, " ", activeWorkflow === "record" ? "Add record" : "Add booked patient")), activeWorkflow === "finance" ? /*#__PURE__*/React.createElement(FinancePanel, { patients: patients }) : activeWorkflow === "requests" ? /*#__PURE__*/React.createElement(RequestsInbox, {
