@@ -163,6 +163,9 @@
   .ticks{display:inline-flex;align-items:center}.ticks.read{color:#34B7F1}.ticks.failed{color:var(--red-fg)}
   .composer{display:flex;gap:8px}
   .composer input{flex:1;border:1px solid var(--line-strong);border-radius:9px;padding:8px 10px;background:#fff;outline:none}
+.ef.full:has(.wamini){display:none}
+input.cbx{display:none}
+td:first-child:has(input.cbx),th:first-child:has(input.cbx){padding:0;width:0}
 
   /* modals */
   .overlay{position:fixed;inset:0;background:rgba(15,26,36,.42);z-index:70;animation:fade .16s ease}
