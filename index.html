@@ -304,8 +304,8 @@
   .orline::before,.orline::after{content:"";flex:1;height:1px;background:var(--line)}
 
   /* ---- last message column ---- */
-  th.lmcol{min-width:190px}
-  td.lmcol{max-width:230px;white-space:normal}
+  th.lmcol{min-width:260px;width:100%}
+  td.lmcol{white-space:normal}
   .lastmsg{display:flex;flex-direction:column;gap:2px;cursor:default}
   .lm-body{display:flex;align-items:flex-start;gap:5px;font-size:12.5px;color:var(--ink-2);line-height:1.35}
   .lm-body>span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
@@ -2960,18 +2960,6 @@ function RecordsTable({
     className: "tablewrap"
   }, /*#__PURE__*/React.createElement("table", null, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
     style: {
-      width: 38
-    }
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "checkbox",
-    className: "cbx" + (someSel ? " indet" : ""),
-    checked: allSel,
-    onChange: toggleAll,
-    ref: el => {
-      if (el) el.indeterminate = someSel;
-    }
-  })), /*#__PURE__*/React.createElement("th", {
-    style: {
       width: 44
     },
     className: "right"
@@ -2993,13 +2981,6 @@ function RecordsTable({
     className: "row" + (sel.has(p.id) ? " sel" : ""),
     onClick: () => setEditingId(p.id)
   }, /*#__PURE__*/React.createElement("td", {
-    onClick: e => e.stopPropagation()
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "checkbox",
-    className: "cbx",
-    checked: sel.has(p.id),
-    onChange: () => toggleOne(p.id)
-  })), /*#__PURE__*/React.createElement("td", {
     className: "right cellmuted num"
   }, idx + 1), /*#__PURE__*/React.createElement("td", {
     className: "pname"
