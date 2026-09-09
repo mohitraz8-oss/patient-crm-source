@@ -2560,7 +2560,7 @@ function FinancePanel({ patients }) {
   const CF = [["all", "All clinics"]].concat(clinics.map(c => [c, c]));
   const TF = [["all", "All time"], ["year", "This year"], ["month", "This month"]];
   const btn = (on, lbl, fn) => React.createElement("button", { onClick: fn, style: { cursor: "pointer", fontFamily: "inherit", border: "1px solid " + (on ? "var(--primary)" : "var(--line)"), background: on ? "var(--primary)" : "var(--surface)", color: on ? "#fff" : "var(--ink)", padding: "5px 11px", borderRadius: 8, fontSize: 12.5, fontWeight: 500 } }, lbl);
-  return React.createElement("div", { style: { padding: 16 } },
+  return React.createElement("div", { style: { padding: "16px 0" } },
     React.createElement("div", { style: { display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 16 } },
       React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } }, CF.map(([k, l]) => React.createElement(React.Fragment, { key: k }, btn(clinic === k, l, () => setClinic(k))))),
       React.createElement("select", { value: tm, onChange: e => setTm(e.target.value), style: { border: "1px solid var(--line)", borderRadius: 9, padding: "7px 12px", fontSize: 12.5, color: "var(--ink)", background: "var(--surface)", fontFamily: "inherit", cursor: "pointer", fontWeight: 500 } }, TF.map(([k, l]) => React.createElement("option", { key: k, value: k }, l)))),
@@ -2599,7 +2599,7 @@ function RequestsInbox({ estimates, contacts, clinicChecks, videoCalls, onOpen, 
   const pill = (t, b, f) => React.createElement("span", { style: { background: b, color: f, fontSize: 11.5, fontWeight: 500, padding: "3px 10px", borderRadius: 20, whiteSpace: "nowrap" } }, t);
   const TYPES = [["all", "All"], ["est", "Graft estimates"], ["con", "Contacts"], ["cli", "Clinic checks"], ["vid", "Video calls"]];
   const TIMES = [["today", "Today"], ["week", "This week"], ["month", "This month"], ["all", "All time"]];
-  return React.createElement("div", { style: { padding: 16 } },
+  return React.createElement("div", { style: { padding: "16px 0" } },
     React.createElement("div", { style: { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 12, overflow: "hidden" } },
     React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", padding: "12px 14px", borderBottom: "1px solid var(--line)" } },
       React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: 7 } },
@@ -2644,7 +2644,7 @@ function ClinicChecksPanel({ rows, loading, onRefresh, onReview, onDelete }) {
         React.createElement("a", { className: "btn sm warow", href: wa, target: "_blank", rel: "noreferrer", title: "WhatsApp" }, I.wa),
         React.createElement("button", { className: "btn sm", style: { color: "#dc2626" }, onClick: () => onDelete(c.id), title: "Delete" }, I.trash))));
   };
-  return React.createElement("div", { style: { padding: 16 } },
+  return React.createElement("div", { style: { padding: "16px 0" } },
     React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 } },
       React.createElement("strong", null, "Clinic Checks"), React.createElement("button", { className: "btn", onClick: onRefresh }, "Refresh")),
     loading && React.createElement("div", null, "Loading\u2026"),
@@ -2687,7 +2687,7 @@ function VideoCallsPanel({ rows, loading, onRefresh, onSave, onDelete }) {
         React.createElement("a", { className: "btn sm warow", href: wa, target: "_blank", rel: "noreferrer", title: "WhatsApp" }, I.wa),
         React.createElement("button", { className: "btn sm", style: { color: "#dc2626" }, onClick: () => onDelete(v.id), title: "Delete" }, I.trash))));
   };
-  return React.createElement("div", { style: { padding: 16 } },
+  return React.createElement("div", { style: { padding: "16px 0" } },
     React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 } },
       React.createElement("strong", null, "Video Calls"), React.createElement("button", { className: "btn", onClick: onRefresh }, "Refresh")),
     loading && React.createElement("div", null, "Loading\u2026"),
@@ -2726,7 +2726,7 @@ function EstimatesPanel({ estimates, loading, onRefresh, onSend }) {
     React.createElement("td", null, e.phone || "\u2014"),
     React.createElement("td", null, e.tier || "\u2014"),
     React.createElement("td", null, e.status === "pending" ? React.createElement("span", { className: "pill" }, "Pending") : React.createElement("span", { className: "pill" }, "Sent \u00B7 ", e.estimated_grafts)));
-  return React.createElement("div", { style: { padding: 16 } },
+  return React.createElement("div", { style: { padding: "16px 0" } },
     React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 } },
       React.createElement("strong", null, "Graft Estimate Requests"), React.createElement("button", { className: "btn", onClick: onRefresh }, "Refresh")),
     loading && React.createElement("div", null, "Loading\u2026"),
@@ -2768,7 +2768,7 @@ function ContactsPanel({ contacts, loading, onRefresh, onMarkContacted }) {
         c.contacted ? React.createElement("span", { className: "pill" }, "Contacted") : React.createElement("button", { className: "btn", onClick: () => onMarkContacted(c.id) }, "Mark contacted"),
         React.createElement("a", { className: "btn sm warow", href: wa, target: "_blank", rel: "noreferrer", title: "WhatsApp" }, I.wa))));
   };
-  return React.createElement("div", { style: { padding: 16 } },
+  return React.createElement("div", { style: { padding: "16px 0" } },
     React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 } },
       React.createElement("strong", null, "Contact Requests"), React.createElement("button", { className: "btn", onClick: onRefresh }, "Refresh")),
     loading && React.createElement("div", null, "Loading\u2026"),
@@ -2831,7 +2831,7 @@ function RecordsTable({
   });
   const clear = () => setSel(new Set());
   const bookedCount = useMemo(() => patients.filter(p => tagsFor(p).length > 0).length, [patients, bookedIndex]);
-  return /*#__PURE__*/React.createElement("div", { style: { padding: 16 } }, /*#__PURE__*/React.createElement("div", {
+  return /*#__PURE__*/React.createElement("div", { style: { padding: "16px 0" } }, /*#__PURE__*/React.createElement("div", {
     className: "stats",
     style: {
       gridTemplateColumns: "repeat(3,1fr)"
@@ -3132,7 +3132,7 @@ function BookedTable({
     return n;
   });
   const clear = () => setSel(new Set());
-  return /*#__PURE__*/React.createElement("div", { style: { padding: 16 } }, /*#__PURE__*/React.createElement("div", {
+  return /*#__PURE__*/React.createElement("div", { style: { padding: "16px 0" } }, /*#__PURE__*/React.createElement("div", {
     className: "stats",
     style: {
       gridTemplateColumns: "repeat(4,1fr)"
