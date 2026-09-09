@@ -2549,10 +2549,10 @@ function FinancePanel({ patients }) {
   const pd = booked.filter(p => p.stage === "Payment Done");
   const fmt = n => !n ? "\u20B90" : n >= 1e7 ? "\u20B9" + (n / 1e7).toFixed(2) + " Cr" : n >= 1e5 ? "\u20B9" + (n / 1e5).toFixed(2) + " L" : "\u20B9" + Math.round(n).toLocaleString("en-IN");
   const cards = [
-    { l: "Total booked", n: booked.length, s: fmt(pkg(booked)) + " booked value", d: null },
-    { l: "Booking done", n: bd.length, s: fmt(sum(bd)) + " commission upcoming", d: "#BA7517" },
-    { l: "HT done \u2014 awaiting payment", n: ht.length, s: fmt(sum(ht)) + " to collect", d: "#D85A30" },
-    { l: "Payment done", n: pd.length, s: fmt(sum(pd)) + " received", d: "#639922" }
+    { l: "Total earned", n: fmt(sum(pd)), s: pd.length + (pd.length === 1 ? " paid surgery" : " paid surgeries"), d: "#639922" },
+    { l: "Patients who got surgery", n: (ht.length + pd.length), s: "HT done + payment done", d: "#378ADD" },
+    { l: "Upcoming \u2014 surgery pending", n: fmt(sum(bd)), s: bd.length + (bd.length === 1 ? " patient" : " patients") + ", not done yet", d: "#BA7517" },
+    { l: "HT done \u2014 payment awaiting", n: fmt(sum(ht)), s: ht.length + (ht.length === 1 ? " patient" : " patients") + ", to collect", d: "#D85A30" }
   ];
   const byClinic = {};
   booked.filter(p => p.stage === "Payment Done").forEach(p => { byClinic[p.clinic] = (byClinic[p.clinic] || 0) + commissionOf(p); });
@@ -2572,9 +2572,8 @@ function FinancePanel({ patients }) {
         React.createElement("div", { style: { fontSize: 29, fontWeight: 600, margin: "8px 0 5px" } }, c.n),
         React.createElement("div", { style: { fontSize: 13, color: "#4B5563" } }, c.s)))),
     React.createElement("div", { style: { display: "flex", gap: 24, marginBottom: 18, fontSize: 13, color: "#4B5563", flexWrap: "wrap" } },
-      React.createElement("span", null, "Earned so far: ", React.createElement("b", { style: { color: "#3B6D11" } }, fmt(earned))),
-      React.createElement("span", null, "Upcoming (not yet paid): ", React.createElement("b", { style: { color: "#854F0B" } }, fmt(upcoming))),
-      React.createElement("span", null, "Surgeries done: ", React.createElement("b", { style: { color: "var(--ink)" } }, surgeries))),
+      React.createElement("span", null, "Total booked: ", React.createElement("b", { style: { color: "var(--ink)" } }, booked.length + " \u00B7 " + fmt(pkg(booked)) + " value")),
+      React.createElement("span", null, "Combined commission (all stages): ", React.createElement("b", { style: { color: "var(--primary)" } }, fmt(sum(bd) + sum(ht) + sum(pd))))),
     React.createElement("div", { style: { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 12, padding: "16px 18px" } },
       React.createElement("div", { style: { fontSize: 13.5, fontWeight: 600, marginBottom: 14 } }, "Received by clinic"),
       rows.length === 0 ? React.createElement("div", { style: { fontSize: 13, color: "var(--muted)" } }, "No payments received in this range yet.") :
