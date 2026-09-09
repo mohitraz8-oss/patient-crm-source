@@ -2397,10 +2397,10 @@ function App({
     onClick: () => switchWorkflow("requests")
   }, "Requests ", (pendingEstimatesCount + pendingContactsCount + pendingClinicChecksCount + pendingVideoCallsCount) > 0 && /*#__PURE__*/React.createElement("span", {
     className: "pill"
-  }, pendingEstimatesCount + pendingContactsCount + pendingClinicChecksCount + pendingVideoCallsCount)), (activeWorkflow === "record" || activeWorkflow === "booked") && /*#__PURE__*/React.createElement("button", {
+  }, pendingEstimatesCount + pendingContactsCount + pendingClinicChecksCount + pendingVideoCallsCount)), /*#__PURE__*/React.createElement("button", { className: "wftab" + (activeWorkflow === "finance" ? " on" : ""), onClick: () => switchWorkflow("finance") }, "Finance"), (activeWorkflow === "record" || activeWorkflow === "booked") && /*#__PURE__*/React.createElement("button", {
     className: "btn primary",
     onClick: addBlank
-  }, I.plus, " ", activeWorkflow === "record" ? "Add record" : "Add booked patient")), activeWorkflow === "requests" ? /*#__PURE__*/React.createElement(RequestsInbox, {
+  }, I.plus, " ", activeWorkflow === "record" ? "Add record" : "Add booked patient")), activeWorkflow === "finance" ? /*#__PURE__*/React.createElement(FinancePanel, { patients: patients }) : activeWorkflow === "requests" ? /*#__PURE__*/React.createElement(RequestsInbox, {
     estimates: estimates, contacts: contacts, clinicChecks: clinicChecks, videoCalls: videoCalls,
     onOpen: switchWorkflow,
     onRefresh: () => { loadEstimates(); loadContacts(); loadClinicChecks(); loadVideoCalls(); }
@@ -2535,6 +2535,55 @@ function App({
 /* =========================================================================
    ESTIMATES PANEL  (graft-estimate requests from the Hair Transplant Guide)
    ========================================================================= */
+function FinancePanel({ patients }) {
+  const [clinic, setClinic] = useState("all");
+  const [tm, setTm] = useState("all");
+  const allBooked = (patients || []).filter(p => p.workflow === "booked" && p.stage !== "Refunded");
+  const clinics = Array.from(new Set(allBooked.map(p => p.clinic))).filter(Boolean);
+  const inTime = p => { if (tm === "all") return true; const d = p.bookingDate ? new Date(p.bookingDate) : null; if (!d || isNaN(d)) return false; const now = new Date(); if (tm === "year") return d.getFullYear() === now.getFullYear(); return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth(); };
+  const booked = allBooked.filter(p => (clinic === "all" || p.clinic === clinic) && inTime(p));
+  const sum = arr => arr.reduce((a, p) => a + commissionOf(p), 0);
+  const pkg = arr => arr.reduce((a, p) => a + (p.finalPackage || 0), 0);
+  const bd = booked.filter(p => p.stage === "Booking Done");
+  const ht = booked.filter(p => p.stage === "HT Done");
+  const pd = booked.filter(p => p.stage === "Payment Done");
+  const fmt = n => !n ? "\u20B90" : n >= 1e7 ? "\u20B9" + (n / 1e7).toFixed(2) + " Cr" : n >= 1e5 ? "\u20B9" + (n / 1e5).toFixed(2) + " L" : "\u20B9" + Math.round(n).toLocaleString("en-IN");
+  const cards = [
+    { l: "Total booked", n: booked.length, s: fmt(pkg(booked)) + " booked value", d: null },
+    { l: "Booking done", n: bd.length, s: fmt(sum(bd)) + " commission upcoming", d: "#BA7517" },
+    { l: "HT done \u2014 awaiting payment", n: ht.length, s: fmt(sum(ht)) + " to collect", d: "#D85A30" },
+    { l: "Payment done", n: pd.length, s: fmt(sum(pd)) + " received", d: "#639922" }
+  ];
+  const byClinic = {};
+  booked.filter(p => p.stage === "Payment Done").forEach(p => { byClinic[p.clinic] = (byClinic[p.clinic] || 0) + commissionOf(p); });
+  const rows = Object.keys(byClinic).map(k => ({ clinic: k, amt: byClinic[k] })).sort((a, b) => b.amt - a.amt);
+  const maxC = Math.max(1, ...rows.map(r => r.amt));
+  const earned = sum(pd), upcoming = sum(bd) + sum(ht), surgeries = ht.length + pd.length;
+  const CF = [["all", "All clinics"]].concat(clinics.map(c => [c, c]));
+  const TF = [["all", "All time"], ["year", "This year"], ["month", "This month"]];
+  const btn = (on, lbl, fn) => React.createElement("button", { onClick: fn, style: { cursor: "pointer", fontFamily: "inherit", border: "1px solid " + (on ? "var(--primary)" : "var(--line)"), background: on ? "var(--primary)" : "var(--surface)", color: on ? "#fff" : "var(--ink)", padding: "6px 13px", borderRadius: 9, fontSize: 13, fontWeight: 500 } }, lbl);
+  return React.createElement("div", { style: { padding: 16 } },
+    React.createElement("div", { style: { display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 16 } },
+      React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } }, CF.map(([k, l]) => React.createElement(React.Fragment, { key: k }, btn(clinic === k, l, () => setClinic(k))))),
+      React.createElement("div", { style: { display: "flex", gap: 4, background: "var(--gray-bg)", padding: 3, borderRadius: 9 } }, TF.map(([k, l]) => { const on = tm === k; return React.createElement("button", { key: k, onClick: () => setTm(k), style: { cursor: "pointer", fontFamily: "inherit", border: "none", background: on ? "var(--surface)" : "transparent", color: on ? "var(--primary)" : "var(--muted)", padding: "5px 11px", borderRadius: 7, fontSize: 12, fontWeight: 500 } }, l); }))),
+    React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 16 } },
+      cards.map((c, i) => React.createElement("div", { key: i, style: { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 12, padding: "16px 18px" } },
+        React.createElement("div", { style: { fontSize: 11, fontWeight: 600, letterSpacing: ".04em", color: "var(--muted)", textTransform: "uppercase", display: "flex", alignItems: "center", gap: 7 } }, c.d && React.createElement("span", { style: { width: 8, height: 8, borderRadius: "50%", background: c.d } }), c.l),
+        React.createElement("div", { style: { fontSize: 29, fontWeight: 600, margin: "8px 0 5px" } }, c.n),
+        React.createElement("div", { style: { fontSize: 13, color: "#4B5563" } }, c.s)))),
+    React.createElement("div", { style: { display: "flex", gap: 24, marginBottom: 18, fontSize: 13, color: "#4B5563", flexWrap: "wrap" } },
+      React.createElement("span", null, "Earned so far: ", React.createElement("b", { style: { color: "#3B6D11" } }, fmt(earned))),
+      React.createElement("span", null, "Upcoming (not yet paid): ", React.createElement("b", { style: { color: "#854F0B" } }, fmt(upcoming))),
+      React.createElement("span", null, "Surgeries done: ", React.createElement("b", { style: { color: "var(--ink)" } }, surgeries))),
+    React.createElement("div", { style: { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 12, padding: "16px 18px" } },
+      React.createElement("div", { style: { fontSize: 13.5, fontWeight: 600, marginBottom: 14 } }, "Received by clinic"),
+      rows.length === 0 ? React.createElement("div", { style: { fontSize: 13, color: "var(--muted)" } }, "No payments received in this range yet.") :
+        rows.map((r, i) => React.createElement("div", { key: i, style: { display: "flex", alignItems: "center", gap: 12, marginBottom: 12 } },
+          React.createElement("span", { style: { width: 80, fontSize: 13, fontWeight: 500 } }, r.clinic),
+          React.createElement("div", { style: { flex: 1, background: "#F1EFE8", borderRadius: 6, height: 22, overflow: "hidden" } }, React.createElement("div", { style: { width: Math.max(4, Math.round(r.amt / maxC * 100)) + "%", background: "var(--primary)", height: "100%", borderRadius: 6 } })),
+          React.createElement("span", { style: { width: 96, textAlign: "right", fontSize: 13, fontWeight: 500 } }, fmt(r.amt))))));
+}
+
 function RequestsInbox({ estimates, contacts, clinicChecks, videoCalls, onOpen, onRefresh }) {
   const [ty, setTy] = useState("all");
   const [tm, setTm] = useState("all");
