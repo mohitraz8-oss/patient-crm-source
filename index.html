@@ -1086,6 +1086,11 @@ const db = {
     if (error) throw error;
     return data;
   },
+  async loadPlans() {
+    const { data, error } = await sb.from("purchases").select("*").order("created_at", { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
   async markContacted(id) {
     const {
       error
@@ -1666,6 +1671,8 @@ function App({
   const [estimatesLoading, setEstimatesLoading] = useState(false);
   const [estimatesLoaded, setEstimatesLoaded] = useState(false);
   const [contacts, setContacts] = useState([]);
+  const [plans, setPlans] = useState([]);
+  const [plansLoaded, setPlansLoaded] = useState(false);
   const [contactsLoading, setContactsLoading] = useState(false);
   const [contactsLoaded, setContactsLoaded] = useState(false);
   const [clinicChecks, setClinicChecks] = useState([]);
@@ -1779,8 +1786,9 @@ function App({
     if (w === "contacts" && !contactsLoaded) loadContacts();
     if (w === "clinic_checks" && !clinicChecksLoaded) loadClinicChecks();
     if (w === "video_calls" && !videoCallsLoaded) loadVideoCalls();
-    if (w === "requests") { if (!estimatesLoaded) loadEstimates(); if (!contactsLoaded) loadContacts(); if (!clinicChecksLoaded) loadClinicChecks(); if (!videoCallsLoaded) loadVideoCalls(); }
+    if (w === "requests") { if (!estimatesLoaded) loadEstimates(); if (!contactsLoaded) loadContacts(); if (!clinicChecksLoaded) loadClinicChecks(); if (!videoCallsLoaded) loadVideoCalls(); if (!plansLoaded) loadPlans(); }
   };
+  const loadPlans = useCallback(async () => { try { const rows = await db.loadPlans(); setPlans(rows); setPlansLoaded(true); } catch (e) {} }, []);
   const loadEstimates = useCallback(async () => {
     setEstimatesLoading(true);
     try {
@@ -2393,13 +2401,13 @@ function App({
   }, counts.booked)), /*#__PURE__*/React.createElement("button", {
     className: "wftab" + (["requests","estimates","contacts","clinic_checks","video_calls"].indexOf(activeWorkflow) >= 0 ? " on" : ""),
     onClick: () => switchWorkflow("requests")
-  }, "Requests ", (pendingEstimatesCount + pendingContactsCount + pendingClinicChecksCount + pendingVideoCallsCount) > 0 && /*#__PURE__*/React.createElement("span", {
+  }, "Plan ", (pendingEstimatesCount + pendingContactsCount + pendingClinicChecksCount + pendingVideoCallsCount) > 0 && /*#__PURE__*/React.createElement("span", {
     className: "pill"
   }, pendingEstimatesCount + pendingContactsCount + pendingClinicChecksCount + pendingVideoCallsCount)), /*#__PURE__*/React.createElement("button", { className: "wftab" + (activeWorkflow === "finance" ? " on" : ""), onClick: () => switchWorkflow("finance") }, "Finance"), /*#__PURE__*/React.createElement("div", { className: "spacer" }), (activeWorkflow === "record" || activeWorkflow === "booked") && /*#__PURE__*/React.createElement("button", {
     className: "btn primary",
     onClick: addBlank
   }, I.plus, " ", activeWorkflow === "record" ? "Add record" : "Add booked patient")), activeWorkflow === "finance" ? /*#__PURE__*/React.createElement(FinancePanel, { patients: patients }) : activeWorkflow === "requests" ? /*#__PURE__*/React.createElement(RequestsInbox, {
-    estimates: estimates, contacts: contacts, clinicChecks: clinicChecks, videoCalls: videoCalls,
+    estimates: estimates, contacts: contacts, clinicChecks: clinicChecks, videoCalls: videoCalls, plans: plans,
     onOpen: switchWorkflow,
     onSendEstimate: sendEstimate, onMarkContacted: markContacted, onReviewClinic: reviewClinicCheck, onSaveVideo: scheduleVideoCall,
     onRefresh: () => { loadEstimates(); loadContacts(); loadClinicChecks(); loadVideoCalls(); }
@@ -2595,7 +2603,7 @@ function FinancePanel({ patients }) {
           React.createElement("span", { style: { width: 96, textAlign: "right", fontSize: 13, fontWeight: 500 } }, fmt(r.amt))))), clinic !== "all" && locs.length > 1 && React.createElement("div", { style: { fontSize: 12, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".04em", margin: "4px 0 10px" } }, "By location"), clinic !== "all" && locs.length > 1 && React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 14, marginBottom: 16 } }, locs.map((loc, li) => renderLocCard(loc, booked.filter(p => p.location === loc), li)))));
 }
 
-function RequestsInbox({ estimates, contacts, clinicChecks, videoCalls, onOpen, onRefresh, onSendEstimate, onMarkContacted, onReviewClinic, onSaveVideo }) {
+function RequestsInbox({ estimates, contacts, clinicChecks, videoCalls, plans, onOpen, onRefresh, onSendEstimate, onMarkContacted, onReviewClinic, onSaveVideo }) {
   const [ty, setTy] = useState("all");
   const [tm, setTm] = useState("all");
   const [openRow, setOpenRow] = useState(null);
@@ -2615,7 +2623,21 @@ function RequestsInbox({ estimates, contacts, clinicChecks, videoCalls, onOpen, 
   const pill = (t, b, f) => React.createElement("span", { style: { background: b, color: f, fontSize: 11.5, fontWeight: 500, padding: "3px 10px", borderRadius: 20, whiteSpace: "nowrap" } }, t);
   const TYPES = [["all", "All"], ["est", "Graft estimates"], ["con", "Contacts"], ["disc", "Discounts"], ["cli", "Clinic checks"], ["vid", "Video calls"]];
   const TIMES = [["today", "Today"], ["week", "This week"], ["month", "This month"], ["all", "All time"]];
+  const tierN = t => (plans || []).filter(pp => pp.tier === t).length;
+  const fmtR = n => n >= 1e5 ? "₹" + (n / 1e5).toFixed(2) + " L" : "₹" + Math.round(n).toLocaleString("en-IN");
+  const eN = tierN("essential"), pN = tierN("premium"), fN = tierN("full");
+  const vN = (videoCalls || []).length, cN = (clinicChecks || []).length;
+  const planRev = eN * 299 + pN * 699 + fN * 1499 + vN * 999 + cN * 499;
+  const kpis = [
+    { l: "Essential · ₹299", n: eN, s: fmtR(eN * 299) + " earned", d: "#639922" },
+    { l: "Premium · ₹699", n: pN, s: fmtR(pN * 699) + " earned", d: "#B45309" },
+    { l: "Full · ₹1,499", n: fN, s: fmtR(fN * 1499) + " earned", d: "#0C447C" },
+    { l: "Video call · ₹999", n: vN, s: fmtR(vN * 999) + " earned", d: "#3C3489" },
+    { l: "Clinic review · ₹499", n: cN, s: fmtR(cN * 499) + " earned", d: "#854F0B" }
+  ];
   return React.createElement("div", { style: { padding: "16px 0" } },
+    React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 12, marginBottom: 12 } }, kpis.map((c, i) => React.createElement("div", { key: i, style: { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 12, padding: "14px 16px" } }, React.createElement("div", { style: { fontSize: 11, fontWeight: 600, letterSpacing: ".04em", color: "var(--muted)", textTransform: "uppercase", display: "flex", alignItems: "center", gap: 7 } }, React.createElement("span", { style: { width: 8, height: 8, borderRadius: "50%", background: c.d } }), c.l), React.createElement("div", { style: { fontSize: 28, fontWeight: 600, margin: "7px 0 4px" } }, c.n), React.createElement("div", { style: { fontSize: 12.5, color: "#4B5563" } }, c.s)))),
+    React.createElement("div", { style: { fontSize: 13, color: "var(--muted)", marginBottom: 14 } }, "Total guide earning: ", React.createElement("b", { style: { color: "var(--primary)" } }, fmtR(planRev)), "  ·  Enquiries " + (contacts || []).length + "  ·  Graft estimates " + (estimates || []).length),
     React.createElement("div", { style: { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 12, overflow: "hidden" } },
     React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", padding: "12px 14px", borderBottom: "1px solid var(--line)" } },
       React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: 7 } },
