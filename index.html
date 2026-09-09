@@ -2548,7 +2548,7 @@ function App({
 function ClinicChecksPanel({ rows, loading, onRefresh, onReview, onDelete }) {
   const [openId, setOpenId] = useState(null);
   const [comment, setComment] = useState("");
-  const openRow = id => { const row = rows.find(c => c.id === id); setOpenId(id); setComment(row && row.admin_note || ""); };
+  const openRow = id => { const row = rows.find(c => c.id === id); setOpenId(id); setComment(row && row.admin_note || "I've talked to the clinic \u2014 they'll call you to discuss your discount."); };
   const submit = () => { onReview(openId, comment); setOpenId(null); };
   const Row = c => {
     const d = (c.phone || "").replace(/\D/g, "");
@@ -2586,7 +2586,7 @@ function ClinicChecksPanel({ rows, loading, onRefresh, onReview, onDelete }) {
           row.clinic && React.createElement("div", { style: { fontSize: 13, marginBottom: 2 } }, "Clinic: ", row.clinic),
           row.clinic_link && React.createElement("a", { href: row.clinic_link, target: "_blank", rel: "noreferrer", style: { fontSize: 13, color: "#047857", wordBreak: "break-all", display: "block", marginBottom: 10 } }, row.clinic_link),
           React.createElement("label", { style: { fontSize: 12, fontWeight: 600 } }, "Feedback (shown to the patient)"),
-          React.createElement("textarea", { value: comment, onChange: e => setComment(e.target.value), rows: 4, placeholder: "e.g. Good clinic \u2014 verified surgeon, fair pricing. Go ahead.", style: { width: "100%", padding: 8, marginTop: 4, marginBottom: 12, borderRadius: 6, border: "1px solid #ccc" } }),
+          React.createElement("textarea", { value: comment, onChange: e => setComment(e.target.value), rows: 4, placeholder: "e.g. I've talked to the clinic \u2014 they'll call you to discuss your discount.", style: { width: "100%", padding: 8, marginTop: 4, marginBottom: 12, borderRadius: 6, border: "1px solid #ccc" } }),
           React.createElement("button", { className: "btn primary", style: { width: "100%" }, onClick: submit }, row.status === "reviewed" ? "Save feedback" : "Save & mark reviewed")));
     })());
 }
