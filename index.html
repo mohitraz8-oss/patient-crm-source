@@ -2549,13 +2549,14 @@ function FinancePanel({ patients }) {
   const fmt = n => !n ? "\u20B90" : n >= 1e7 ? "\u20B9" + (n / 1e7).toFixed(2) + " Cr" : n >= 1e5 ? "\u20B9" + (n / 1e5).toFixed(2) + " L" : "\u20B9" + Math.round(n).toLocaleString("en-IN");
   const cards = [
     { l: "Total booked", n: fmt(pkg(booked)), s: booked.length + (booked.length === 1 ? " booking" : " bookings"), d: null },
-    { l: "Combined commission", n: fmt(sum(bd) + sum(ht) + sum(pd)), s: "all stages", d: "#B45309" },
+    { l: "Total commission", n: fmt(sum(bd) + sum(ht) + sum(pd)), s: "all stages", d: "#B45309" },
     { l: "Total earned", n: fmt(sum(pd)), s: pd.length + (pd.length === 1 ? " paid surgery" : " paid surgeries"), d: "#639922" },
     { l: "HT done \u2014 payment awaiting", n: fmt(sum(ht)), s: ht.length + (ht.length === 1 ? " patient" : " patients") + ", to collect", d: "#D85A30" },
     { l: "Upcoming \u2014 surgery pending", n: fmt(sum(bd)), s: bd.length + (bd.length === 1 ? " patient" : " patients") + ", not done yet", d: "#BA7517" }
   ];
+  const _gk = clinic === "all" ? "clinic" : "location";
   const byClinic = {};
-  booked.filter(p => p.stage === "Payment Done").forEach(p => { byClinic[p.clinic] = (byClinic[p.clinic] || 0) + commissionOf(p); });
+  booked.filter(p => p.stage === "Payment Done").forEach(p => { const _k = p[_gk] || "\u2014"; byClinic[_k] = (byClinic[_k] || 0) + commissionOf(p); });
   const rows = Object.keys(byClinic).map(k => ({ clinic: k, amt: byClinic[k] })).sort((a, b) => b.amt - a.amt);
   const maxC = Math.max(1, ...rows.map(r => r.amt));
   const earned = sum(pd), upcoming = sum(bd) + sum(ht), surgeries = ht.length + pd.length;
@@ -2565,7 +2566,7 @@ function FinancePanel({ patients }) {
     const _bd = sub.filter(p => p.stage === "Booking Done"), _ht = sub.filter(p => p.stage === "HT Done"), _pd = sub.filter(p => p.stage === "Payment Done");
     return [
       { l: "Total booked", n: fmt(pkg(sub)), s: sub.length + (sub.length === 1 ? " booking" : " bookings"), d: null },
-      { l: "Combined commission", n: fmt(sum(_bd) + sum(_ht) + sum(_pd)), s: "all stages", d: "#B45309" },
+      { l: "Total commission", n: fmt(sum(_bd) + sum(_ht) + sum(_pd)), s: "all stages", d: "#B45309" },
       { l: "Total earned", n: fmt(sum(_pd)), s: _pd.length + (_pd.length === 1 ? " paid surgery" : " paid surgeries"), d: "#639922" },
       { l: "HT done \u2014 payment awaiting", n: fmt(sum(_ht)), s: _ht.length + (_ht.length === 1 ? " patient" : " patients") + ", to collect", d: "#D85A30" },
       { l: "Upcoming \u2014 surgery pending", n: fmt(sum(_bd)), s: _bd.length + (_bd.length === 1 ? " patient" : " patients") + ", not done yet", d: "#BA7517" }
@@ -2573,19 +2574,25 @@ function FinancePanel({ patients }) {
   };
   const renderCards = arr => React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 12, marginBottom: 16 } }, arr.map((c, i) => React.createElement("div", { key: i, style: { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 12, padding: "16px 18px" } }, React.createElement("div", { style: { fontSize: 11, fontWeight: 600, letterSpacing: ".04em", color: "var(--muted)", textTransform: "uppercase", display: "flex", alignItems: "center", gap: 7 } }, c.d && React.createElement("span", { style: { width: 8, height: 8, borderRadius: "50%", background: c.d } }), c.l), React.createElement("div", { style: { fontSize: 29, fontWeight: 600, margin: "8px 0 5px" } }, c.n), React.createElement("div", { style: { fontSize: 13, color: "#4B5563" } }, c.s))));
   const locs = Array.from(new Set(booked.map(p => p.location))).filter(Boolean);
+  const LOC_ACC = ["#B45309", "#0C447C", "#3B6D11", "#6B4B9A"];
+  const renderLocCard = (loc, sub, li) => {
+    const cs = mkCards(sub); const acc = LOC_ACC[li % LOC_ACC.length];
+    return React.createElement("div", { key: loc, style: { background: "var(--surface)", border: "1px solid var(--line)", borderTop: "3px solid " + acc, borderRadius: 12, padding: "14px 16px" } },
+      React.createElement("div", { style: { fontSize: 14, fontWeight: 600, marginBottom: 8, display: "flex", alignItems: "center", gap: 8 } }, React.createElement("span", { style: { width: 10, height: 10, borderRadius: "50%", background: acc } }), loc, React.createElement("span", { style: { fontSize: 12, color: "var(--muted)", fontWeight: 500, marginLeft: "auto" } }, sub.length + " booked")),
+      cs.map((c, i) => React.createElement("div", { key: i, style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "8px 0", borderTop: i ? "1px solid var(--gray-bg)" : "none" } }, React.createElement("span", { style: { fontSize: 12.5, color: "var(--muted)" } }, c.l), React.createElement("span", { style: { fontSize: 15, fontWeight: 600, color: acc } }, c.n))));
+  };
   const btn = (on, lbl, fn) => React.createElement("button", { onClick: fn, style: { cursor: "pointer", fontFamily: "inherit", border: "1px solid " + (on ? "var(--primary)" : "var(--line)"), background: on ? "var(--primary)" : "var(--surface)", color: on ? "#fff" : "var(--ink)", padding: "5px 11px", borderRadius: 8, fontSize: 12.5, fontWeight: 500 } }, lbl);
   return React.createElement("div", { style: { padding: "16px 0" } },
     React.createElement("div", { style: { display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 16 } },
       React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } }, CF.map(([k, l]) => React.createElement(React.Fragment, { key: k }, btn(clinic === k, l, () => setClinic(k))))),
       React.createElement("select", { value: tm, onChange: e => setTm(e.target.value), style: { border: "1px solid var(--line)", borderRadius: 9, padding: "7px 12px", fontSize: 12.5, color: "var(--ink)", background: "var(--surface)", fontFamily: "inherit", cursor: "pointer", fontWeight: 500 } }, TF.map(([k, l]) => React.createElement("option", { key: k, value: k }, l)))),
-    React.createElement("div", null, clinic !== "all" && locs.length > 1 && React.createElement("div", { style: { fontSize: 12, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".04em", marginBottom: 8 } }, clinic + " · combined"), renderCards(mkCards(booked)), clinic !== "all" && locs.length > 1 && locs.map(loc => React.createElement("div", { key: loc }, React.createElement("div", { style: { fontSize: 12, fontWeight: 600, color: "var(--ink)", textTransform: "uppercase", letterSpacing: ".04em", margin: "6px 0 8px" } }, loc + " · " + booked.filter(p => p.location === loc).length + " booked"), renderCards(mkCards(booked.filter(p => p.location === loc)))))),
-    React.createElement("div", { style: { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 12, padding: "16px 18px" } },
-      React.createElement("div", { style: { fontSize: 13.5, fontWeight: 600, marginBottom: 14 } }, "Received by clinic"),
+    React.createElement("div", null, clinic !== "all" && locs.length > 1 && React.createElement("div", { style: { fontSize: 12, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".04em", marginBottom: 8 } }, clinic + " · combined"), renderCards(mkCards(booked)), React.createElement("div", { style: { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 12, padding: "16px 18px" } },
+      React.createElement("div", { style: { fontSize: 13.5, fontWeight: 600, marginBottom: 14 } }, clinic === "all" ? "Received by clinic" : "Received by " + clinic + " (by location)"),
       rows.length === 0 ? React.createElement("div", { style: { fontSize: 13, color: "var(--muted)" } }, "No payments received in this range yet.") :
         rows.map((r, i) => React.createElement("div", { key: i, style: { display: "flex", alignItems: "center", gap: 12, marginBottom: 12 } },
           React.createElement("span", { style: { width: 80, fontSize: 13, fontWeight: 500 } }, r.clinic),
           React.createElement("div", { style: { flex: 1, background: "#F1EFE8", borderRadius: 6, height: 22, overflow: "hidden" } }, React.createElement("div", { style: { width: Math.max(4, Math.round(r.amt / maxC * 100)) + "%", background: "var(--primary)", height: "100%", borderRadius: 6 } })),
-          React.createElement("span", { style: { width: 96, textAlign: "right", fontSize: 13, fontWeight: 500 } }, fmt(r.amt))))));
+          React.createElement("span", { style: { width: 96, textAlign: "right", fontSize: 13, fontWeight: 500 } }, fmt(r.amt))))), clinic !== "all" && locs.length > 1 && React.createElement("div", { style: { fontSize: 12, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".04em", margin: "4px 0 10px" } }, "By location"), clinic !== "all" && locs.length > 1 && React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 14, marginBottom: 16 } }, locs.map((loc, li) => renderLocCard(loc, booked.filter(p => p.location === loc), li)))));
 }
 
 function RequestsInbox({ estimates, contacts, clinicChecks, videoCalls, onOpen, onRefresh, onSendEstimate, onMarkContacted, onReviewClinic, onSaveVideo }) {
