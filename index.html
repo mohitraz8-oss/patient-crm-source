@@ -81,9 +81,7 @@
   .dot{width:7px;height:7px;border-radius:50%;flex:none}
 
   .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-bottom:none;border-radius:var(--r) var(--r) 0 0;padding:11px 12px;margin-bottom:0}.toolbar+.card{border-top-left-radius:0;border-top-right-radius:0}
-  .search{position:relative;flex:1;min-width:260px}
-input.cbx{display:none!important}
-th:has(input.cbx),td:has(input.cbx){display:none}
+  .search{position:relative;flex:1;min-width:200px}
   .search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted)}
   .search input{width:100%;padding:9px 12px 9px 34px;border:1px solid var(--line-strong);border-radius:9px;background:var(--surface-2);outline:none;transition:.14s}
   .search input:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px var(--primary-tint)}
@@ -139,8 +137,8 @@ th:has(input.cbx),td:has(input.cbx){display:none}
   .bulkbar .x:hover{background:rgba(255,255,255,.12);color:#fff}
 
   /* inline edit row */
-  .editrow td{background:var(--surface-2);padding:16px;cursor:default}
-  .ef-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;white-space:normal}
+  .editrow td{background:var(--surface-2);padding:16px;cursor:default;position:sticky;left:0}
+  .ef-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;white-space:normal;max-width:min(100%,1060px)}
   .ef-grid.narrow{grid-template-columns:repeat(2,1fr)}
   .ef{display:flex;flex-direction:column;gap:4px}
   .ef.full{grid-column:1/-1}
