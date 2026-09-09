@@ -2309,7 +2309,7 @@ function App({
     className: "clinics"
   }, clinicNames.map(c => /*#__PURE__*/React.createElement("span", {
     key: c,
-    className: "cpill" + (activeClinic === c ? " on" : ""),
+    className: "cpill" + (activeClinic === c && activeWorkflow !== "finance" ? " on" : ""),
     onClick: () => switchClinic(c),
     role: "button"
   }, c, " ", /*#__PURE__*/React.createElement("span", {
@@ -2551,7 +2551,6 @@ function FinancePanel({ patients }) {
     { l: "Total booked", n: fmt(pkg(booked)), s: booked.length + (booked.length === 1 ? " booking" : " bookings"), d: null },
     { l: "Total earned", n: fmt(sum(pd)), s: pd.length + (pd.length === 1 ? " paid surgery" : " paid surgeries"), d: "#639922" },
     { l: "Combined commission", n: fmt(sum(bd) + sum(ht) + sum(pd)), s: "all stages", d: "#B45309" },
-    { l: "Patients who got surgery", n: (ht.length + pd.length), s: "HT done + payment done", d: "#378ADD" },
     { l: "Upcoming \u2014 surgery pending", n: fmt(sum(bd)), s: bd.length + (bd.length === 1 ? " patient" : " patients") + ", not done yet", d: "#BA7517" },
     { l: "HT done \u2014 payment awaiting", n: fmt(sum(ht)), s: ht.length + (ht.length === 1 ? " patient" : " patients") + ", to collect", d: "#D85A30" }
   ];
@@ -2567,7 +2566,7 @@ function FinancePanel({ patients }) {
     React.createElement("div", { style: { display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 16 } },
       React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } }, CF.map(([k, l]) => React.createElement(React.Fragment, { key: k }, btn(clinic === k, l, () => setClinic(k))))),
       React.createElement("select", { value: tm, onChange: e => setTm(e.target.value), style: { border: "1px solid var(--line)", borderRadius: 9, padding: "7px 12px", fontSize: 12.5, color: "var(--ink)", background: "var(--surface)", fontFamily: "inherit", cursor: "pointer", fontWeight: 500 } }, TF.map(([k, l]) => React.createElement("option", { key: k, value: k }, l)))),
-    React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginBottom: 16 } },
+    React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 12, marginBottom: 16 } },
       cards.map((c, i) => React.createElement("div", { key: i, style: { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 12, padding: "16px 18px" } },
         React.createElement("div", { style: { fontSize: 11, fontWeight: 600, letterSpacing: ".04em", color: "var(--muted)", textTransform: "uppercase", display: "flex", alignItems: "center", gap: 7 } }, c.d && React.createElement("span", { style: { width: 8, height: 8, borderRadius: "50%", background: c.d } }), c.l),
         React.createElement("div", { style: { fontSize: 29, fontWeight: 600, margin: "8px 0 5px" } }, c.n),
