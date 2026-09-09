@@ -164,8 +164,6 @@
   .composer{display:flex;gap:8px}
   .composer input{flex:1;border:1px solid var(--line-strong);border-radius:9px;padding:8px 10px;background:#fff;outline:none}
 .ef.full:has(.wamini){display:none}
-input.cbx{display:none}
-td:first-child:has(input.cbx),th:first-child:has(input.cbx){padding:0;width:0}
 
   /* modals */
   .overlay{position:fixed;inset:0;background:rgba(15,26,36,.42);z-index:70;animation:fade .16s ease}
@@ -377,8 +375,8 @@ td:first-child:has(input.cbx),th:first-child:has(input.cbx){padding:0;width:0}
   th.stick,td.stick{position:sticky;z-index:3;background:var(--surface)}
   th.stick{z-index:6;background:var(--surface-2)}
   .stick.s0{left:0}
-  .stick.s1{left:38px}
-  .stick.s2{left:82px;box-shadow:6px 0 8px -6px rgba(15,26,36,.16)}
+  .stick.s1{left:0}
+  .stick.s2{left:44px;box-shadow:6px 0 8px -6px rgba(15,26,36,.16)}
   th.stick.s2{box-shadow:6px 0 8px -6px rgba(15,26,36,.16), inset 0 -1px 0 var(--line)}
   /* sticky cells need their own background, so mirror each row tint */
   tr.row.stage-bd td.stick{background:#FFFCF4}
@@ -3307,19 +3305,6 @@ function BookedTable({
   }, /*#__PURE__*/React.createElement("div", {
     className: "tablewrap"
   }, /*#__PURE__*/React.createElement("table", null, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
-    className: "stick s0",
-    style: {
-      width: 38
-    }
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "checkbox",
-    className: "cbx" + (someSel ? " indet" : ""),
-    checked: allSel,
-    onChange: toggleAll,
-    ref: el => {
-      if (el) el.indeterminate = someSel;
-    }
-  })), /*#__PURE__*/React.createElement("th", {
     className: "stick s1 right",
     style: {
       width: 44
@@ -3366,14 +3351,6 @@ function BookedTable({
       },
       title: locked ? "HT Done — locked from editing" : "Click to edit"
     }, /*#__PURE__*/React.createElement("td", {
-      className: "stick s0",
-      onClick: e => e.stopPropagation()
-    }, /*#__PURE__*/React.createElement("input", {
-      type: "checkbox",
-      className: "cbx",
-      checked: sel.has(p.id),
-      onChange: () => toggleOne(p.id)
-    })), /*#__PURE__*/React.createElement("td", {
       className: "stick s1 right cellmuted num"
     }, idx + 1), /*#__PURE__*/React.createElement("td", {
       className: "stick s2"
