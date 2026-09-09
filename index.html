@@ -3489,7 +3489,7 @@ function BookedEditRow({
     type: "number",
     min: "0",
     value: f.finalPackage ?? "",
-    onChange: set("finalPackage"),
+    onChange: e => setF(s => { const v = e.target.value, tg = Number(s.totalGrafts) || 0; return Object.assign({}, s, { finalPackage: v, perGraft: (tg > 0 && v !== "") ? Math.round(Number(v) / tg) : s.perGraft }); }),
     placeholder: "0"
   })), /*#__PURE__*/React.createElement("div", {
     className: "ef"
@@ -3525,7 +3525,7 @@ function BookedEditRow({
     type: "number",
     min: "0",
     value: f.totalGrafts ?? "",
-    onChange: set("totalGrafts"),
+    onChange: e => setF(s => { const v = e.target.value, tg = Number(v) || 0; const o = Object.assign({}, s, { totalGrafts: v }); if (tg > 0) { if (s.finalPackage !== "" && s.finalPackage != null) o.perGraft = Math.round(Number(s.finalPackage) / tg); else if (s.perGraft !== "" && s.perGraft != null && Number(s.perGraft) > 0) o.finalPackage = Math.round(Number(s.perGraft) * tg); } return o; }),
     placeholder: "0"
   })), /*#__PURE__*/React.createElement("div", {
     className: "ef"
@@ -3533,7 +3533,7 @@ function BookedEditRow({
     type: "number",
     min: "0",
     value: f.perGraft ?? "",
-    onChange: set("perGraft"),
+    onChange: e => setF(s => { const v = e.target.value, tg = Number(s.totalGrafts) || 0; return Object.assign({}, s, { perGraft: v, finalPackage: (tg > 0 && v !== "") ? Math.round(Number(v) * tg) : s.finalPackage }); }),
     placeholder: "0"
   })), /*#__PURE__*/React.createElement("div", {
     className: "ef"
@@ -3547,15 +3547,6 @@ function BookedEditRow({
     value: f.priorityReason || "",
     onChange: set("priorityReason"),
     placeholder: "e.g. Completed HT"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "ef full",
-    style: {
-      gridColumn: "3 / span 2"
-    }
-  }, /*#__PURE__*/React.createElement("label", null, "Recommended action"), /*#__PURE__*/React.createElement("input", {
-    value: f.recommendedAction || "",
-    onChange: set("recommendedAction"),
-    placeholder: "e.g. Regular follow-up & engagement"
   })), /*#__PURE__*/React.createElement("div", {
     className: "ef full"
   }, /*#__PURE__*/React.createElement("label", null, "Notes"), /*#__PURE__*/React.createElement("textarea", {
