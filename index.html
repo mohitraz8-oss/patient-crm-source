@@ -65,8 +65,8 @@
   .ltab.add{color:var(--muted);font-weight:600}
 
   /* workflow tabs */
-  .wftabs{display:flex;gap:8px;margin:16px 0 14px}
-  .wftab{border:1px solid var(--line-strong);background:var(--surface);border-radius:10px;padding:9px 16px;font-size:13.5px;font-weight:700;color:var(--ink-2);display:flex;align-items:center;gap:8px;box-shadow:var(--shadow-sm)}
+  .wftabs{display:flex;gap:6px;margin:14px 0 12px}
+  .wftab{border:1px solid var(--line-strong);background:var(--surface);border-radius:9px;padding:7px 13px;font-size:13px;font-weight:700;color:var(--ink-2);display:flex;align-items:center;gap:8px;box-shadow:var(--shadow-sm)}
   .wftab:hover{border-color:var(--muted)}
   .wftab.on{background:var(--primary);border-color:var(--primary);color:#fff}
   .wftab .pill{background:var(--gray-bg);color:var(--gray-fg);font-size:11px;font-weight:700;padding:1px 8px;border-radius:20px}
@@ -80,7 +80,7 @@
   .stat .v{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:7px;line-height:1}
   .dot{width:7px;height:7px;border-radius:50%;flex:none}
 
-  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:11px 12px;box-shadow:var(--shadow-sm);margin-bottom:14px}
+  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-bottom:none;border-radius:var(--r) var(--r) 0 0;padding:11px 12px;margin-bottom:0}.toolbar+.card{border-top-left-radius:0;border-top-right-radius:0}
   .search{position:relative;flex:1;min-width:200px}
   .search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted)}
   .search input{width:100%;padding:9px 12px 9px 34px;border:1px solid var(--line-strong);border-radius:9px;background:var(--surface-2);outline:none;transition:.14s}
