@@ -1284,21 +1284,21 @@ function parseContactsFromText(text) {
   const lines = (text || "").split(/\r?\n/).map(l => l.trim()).filter(Boolean);
   const out = [];
   let pendingName = "";
+  const clean = str => (str || "").replace(/^\[[^\]]*\]\s*[^:]*:\s*/, "").replace(/^(name|contact|mobile|phone|ph|no\.?|number|mob|cell|whatsapp)\s*[.:\-]?\s*/i, "").trim();
   for (const line of lines) {
     const m = line.match(PHONE_RE);
     if (m) {
       const phone = m[1].replace(/[\s-]+/g, "");
-      const before = line.slice(0, m.index).trim().replace(/[-:,]+$/, "").trim();
-      const after = line.slice(m.index + m[0].length).trim().replace(/^[-:,]+/, "").trim();
-      let name = before || after || pendingName || "";
-      name = name.replace(/^(name|contact)\s*[:\-]?\s*/i, "").trim();
+      const before = clean(line.slice(0, m.index).trim().replace(/[-:,]+$/, "").trim());
+      const after = clean(line.slice(m.index + m[0].length).trim().replace(/^[-:,]+/, "").trim());
+      let name = before || pendingName || after || "";
       if (phone.replace(/\D/g, "").length >= 7) out.push({
         name: name || "Unknown",
         phone
       });
       pendingName = "";
-    } else if (/[A-Za-z]/.test(line) && line.length < 60) {
-      pendingName = line.replace(/^(name|contact)\s*[:\-]?\s*/i, "").trim();
+    } else if (/[A-Za-z]/.test(line) && line.length < 80) {
+      pendingName = clean(line);
     }
   }
   return out;
