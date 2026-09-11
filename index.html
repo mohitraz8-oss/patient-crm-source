@@ -3859,6 +3859,8 @@ function extractContacts(text) {
   const CITY = /^\s*(city|location|from|age|place|address)\s*[:\-\u2013]*\s*/i;
   const PHONE = /(\+?\d[\d\s\-()]{7,}\d)/;
   const clean = t => String(t || "").replace(/[\u25a0\u25fc\u25aa\ufffd\u200e]/g, "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim().replace(/^[-\u2013\u2014\u2022,.:;()]+/, "").replace(/[-\u2013\u2014\u2022,.:;()]+$/, "").trim();
+  const stripChat = t => String(t || "").replace(/^\[[^\]]*\]\s*[^:]*:?\s*/, "");
+  const isJunk = t => !t || /whatsapp/i.test(t) || /^(waiting|done|ok(ay)?|hi+|hello+|hey|yes|no|thanks?|thank you|good\s?(morning|evening|afternoon|night)|please|pls|reminder|follow\s?up|call|message|msg|reply|location|address|from|city|status|note)\b/i.test(t) || t.split(/\s+/).filter(Boolean).length > 5 || t.length > 40;
   const out = [];
   let pending = []; // text lines seen since the last phone
   const raw = String(text || "").replace(/No\.\s*Name\s*Phone Number/gi, "\n");
@@ -3871,8 +3873,9 @@ function extractContacts(text) {
     const m = PHONE.exec(line);
     if (!m) {
       // remember it — the number may be on a following line
-      let t = clean(LABEL.test(line) ? line.replace(LABEL, "") : line);
-      if (t && !CITY.test(line) && !PHONE_LABEL.test(line) && /[A-Za-z]{2}/.test(t) && t.length <= 60) pending.push(t);
+      let sl = stripChat(line);
+      let t = clean(LABEL.test(sl) ? sl.replace(LABEL, "") : sl);
+      if (t && !isJunk(t) && !CITY.test(sl) && !PHONE_LABEL.test(sl) && /[A-Za-z]{2}/.test(t)) pending.push(t);
       if (pending.length > 4) pending.shift();
       continue;
     }
@@ -3882,9 +3885,9 @@ function extractContacts(text) {
     }
 
     // a name on the same line wins; otherwise take the first line we remembered
-    let inline = clean(line.slice(0, m.index).replace(LABEL, "").replace(PHONE_LABEL, ""));
+    let inline = clean(stripChat(line.slice(0, m.index)).replace(LABEL, "").replace(PHONE_LABEL, ""));
     if (inline && (CITY.test(line) || !/[A-Za-z]{2}/.test(inline))) inline = "";
-    if (/^(name|mob|no|number|phone|ok|okay)$/i.test(inline)) inline = "";
+    if (isJunk(inline)) inline = "";
     const name = inline || pending[0] || "";
     out.push({
       name,
