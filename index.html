@@ -775,8 +775,8 @@ const UI = {
     hi: 'मुफ़्त प्रीव्यू'
   },
   previewTitle: {
-    en: "The 10 questions inside",
-    hi: 'गाइड में शामिल 10 सवाल'
+    en: "Here's a look inside",
+    hi: 'अंदर एक झलक'
   },
   tableOfContents: {
     en: 'What you get, section by section',
@@ -2082,7 +2082,7 @@ function VideoCallList({
         })
       });
       const d = await r.json();
-      if (r.ok && d.ok) setItems(d.calls || []);else setErr(true);
+      if (r.ok && d.ok) setItems((d.calls || []).filter(c => c && c.status !== 'done'));else setErr(true);
     } catch (e) {
       setErr(true);
     }
@@ -2646,11 +2646,13 @@ function Preview({
     className: "pt-2 pb-6"
   }, React.createElement("p", {
     className: "mb-3 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
-  }, L(UI.previewEyebrow, lang))), React.createElement("section", {
+  }, L(UI.previewEyebrow, lang)), React.createElement("h1", {
+    className: "font-serif text-3xl tracking-tight text-stone-900 sm:text-4xl"
+  }, L(UI.previewTitle, lang))), React.createElement("section", {
     className: "rounded-xl border border-stone-200 bg-white p-6"
-  }, React.createElement("h1", {
-    className: "mb-3 font-serif text-lg text-emerald-700"
-  }, L(UI.previewTitle, lang)), React.createElement("div", null, SECTIONS_META.map(s => React.createElement(TocRow, {
+  }, React.createElement("h2", {
+    className: "mb-3 font-serif text-xl text-stone-900"
+  }, lang === 'hi' ? 'गाइड में शामिल 10 सवाल' : 'The 10 questions inside'), React.createElement("div", null, SECTIONS_META.map(s => React.createElement(TocRow, {
     key: s.id,
     s: s,
     lang: lang
