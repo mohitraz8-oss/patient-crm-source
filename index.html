@@ -1284,21 +1284,31 @@ function parseContactsFromText(text) {
   const lines = (text || "").split(/\r?\n/).map(l => l.trim()).filter(Boolean);
   const out = [];
   let pendingName = "";
-  const clean = str => (str || "").replace(/^\[[^\]]*\]\s*[^:]*:\s*/, "").replace(/^(name|contact|mobile|phone|ph|no\.?|number|mob|cell|whatsapp)\s*[.:\-]?\s*/i, "").trim();
+  const clean = str => (str || "").replace(/^\[[^\]]*\]\s*[^:]*:?\s*/, "").replace(/^(name|contact|mobile|phone|ph|no\.?|number|mob|cell|whatsapp)\s*[.:\-]?\s*/i, "").trim();
+  const looksLikeName = str => {
+    if (!str) return false;
+    const w = str.split(/\s+/).filter(Boolean);
+    if (w.length === 0 || w.length > 5 || str.length > 40) return false;
+    if ((str.match(/[A-Za-z]/g) || []).length < 2) return false;
+    if (/whatsapp/i.test(str)) return false;
+    if (/^(waiting|done|ok(ay)?|hi+|hello+|hey|yes|no|thanks?|thank you|good\s?(morning|evening|afternoon|night)|morning|evening|please|pls|reminder|follow\s?up|call|message|msg|reply|test|sample|new|old|list|contacts?|group|not|na|nil|unknown)\b/i.test(str)) return false;
+    return true;
+  };
   for (const line of lines) {
     const m = line.match(PHONE_RE);
     if (m) {
       const phone = m[1].replace(/[\s-]+/g, "");
       const before = clean(line.slice(0, m.index).trim().replace(/[-:,]+$/, "").trim());
       const after = clean(line.slice(m.index + m[0].length).trim().replace(/^[-:,]+/, "").trim());
-      let name = before || pendingName || after || "";
+      let name = [before, pendingName, after].find(looksLikeName) || "";
       if (phone.replace(/\D/g, "").length >= 7) out.push({
         name: name || "Unknown",
         phone
       });
       pendingName = "";
     } else if (/[A-Za-z]/.test(line) && line.length < 80) {
-      pendingName = clean(line);
+      const cand = clean(line);
+      pendingName = looksLikeName(cand) ? cand : "";
     }
   }
   return out;
