@@ -2520,7 +2520,8 @@ function App({
   }), importOpen && /*#__PURE__*/React.createElement(ImportContactsModal, {
     onCancel: () => setImportOpen(false),
     onImport: importContacts,
-    destination: activeClinic + " · " + activeLocation
+    destination: activeClinic + " · " + activeLocation,
+    existingPhones: new Set(patients.map(p => String(p.phone || "").replace(/\D/g, "").slice(-10)).filter(Boolean))
   }), composeIds && composePatients.length > 0 && !waQueue && !broadcast && /*#__PURE__*/React.createElement(Composer, {
     patients: composePatients,
     templates: templates,
@@ -3697,14 +3698,19 @@ function PromptModal({
 function ImportContactsModal({
   onCancel,
   onImport,
-  destination
+  destination,
+  existingPhones
 }) {
   const [text, setText] = useState("");
   const [fileRows, setFileRows] = useState(null);
   const [busy, setBusy] = useState("");
   const [err, setErr] = useState("");
   const [drag, setDrag] = useState(false);
-  const parsed = useMemo(() => fileRows ? fileRows : extractContacts(text), [text, fileRows]);
+  const parsedAll = useMemo(() => fileRows ? fileRows : extractContacts(text), [text, fileRows]);
+  const parsed = useMemo(() => {
+    const ex = existingPhones || new Set();
+    return parsedAll.filter(c => !ex.has(String(c.phone || "").replace(/\D/g, "").slice(-10)));
+  }, [parsedAll, existingPhones]);
   useEffect(() => {
     const k = e => {
       if (e.key === "Escape") onCancel();
@@ -3809,12 +3815,12 @@ function ImportContactsModal({
     className: "field"
   }, /*#__PURE__*/React.createElement("label", null, "Preview ", parsed.length > 0 && /*#__PURE__*/React.createElement("span", {
     className: "cellmuted"
-  }, "(", parsed.length, " contact", parsed.length === 1 ? "" : "s", " found)")), parsed.length === 0 ? /*#__PURE__*/React.createElement("div", {
+  }, "(", parsed.length, " new contact", parsed.length === 1 ? "" : "s", " found)")), parsed.length === 0 ? /*#__PURE__*/React.createElement("div", {
     className: "cellmuted",
     style: {
       padding: "10px 0"
     }
-  }, "Nothing yet — upload a file or paste text above.") : /*#__PURE__*/React.createElement("div", {
+  }, parsedAll.length > 0 ? "All of these are already in your records — nothing new to add." : "Nothing yet — upload a file or paste text above.") : /*#__PURE__*/React.createElement("div", {
     className: "chips",
     style: {
       maxHeight: 170
