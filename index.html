@@ -3862,38 +3862,39 @@ function extractContacts(text) {
   const stripChat = t => String(t || "").replace(/^\[[^\]]*\]\s*[^:]*:?\s*/, "");
   const isJunk = t => !t || /whatsapp/i.test(t) || /^(waiting|done|ok(ay)?|hi+|hello+|hey|yes|no|thanks?|thank you|good\s?(morning|evening|afternoon|night)|please|pls|reminder|follow\s?up|call|message|msg|reply|location|address|from|city|status|note)\b/i.test(t) || t.split(/\s+/).filter(Boolean).length > 5 || t.length > 40;
   const out = [];
-  let pending = []; // text lines seen since the last phone
+  let pending = [];
+  let awaiting = -1;
+  const stripLabels = t => clean(String(t || "").replace(/\s*(mobile\s*number|mobile\s*no|whats?app\s*no|contact\s*no|phone\s*no|mobile|number|contact|phone|no\.?|ph|mob|cell|whats?app)\s*$/i, ""));
   const raw = String(text || "").replace(/No\.\s*Name\s*Phone Number/gi, "\n");
   for (let line of raw.split(/\r?\n/)) {
     line = line.replace(/\u00a0/g, " ").trim();
     if (!line) continue;
     if (HEADER.test(line)) continue;
-    line = line.replace(/^\d{1,4}\s*[.)]?\s+/, ""); // drop a leading row number
+    line = line.replace(/^\d{1,4}\s*[.)]?\s+/, "");
 
     const m = PHONE.exec(line);
     if (!m) {
-      // remember it — the number may be on a following line
       let sl = stripChat(line);
       let t = clean(LABEL.test(sl) ? sl.replace(LABEL, "") : sl);
-      if (t && !isJunk(t) && !CITY.test(sl) && !PHONE_LABEL.test(sl) && /[A-Za-z]{2}/.test(t)) pending.push(t);
+      if (t && !isJunk(t) && !CITY.test(sl) && !PHONE_LABEL.test(sl) && /[A-Za-z]{2}/.test(t)) {
+        if (awaiting >= 0 && !out[awaiting].name) { out[awaiting].name = stripLabels(t); awaiting = -1; }
+        else pending.push(t);
+      } else awaiting = -1;
       if (pending.length > 4) pending.shift();
       continue;
     }
     const digits = m[1].replace(/[^\d]/g, "");
-    if (digits.length < 8 || digits.length > 15) {
-      continue;
-    }
+    if (digits.length < 8 || digits.length > 15) continue;
 
-    // a name on the same line wins; otherwise take the first line we remembered
     let inline = clean(stripChat(line.slice(0, m.index)).replace(LABEL, "").replace(PHONE_LABEL, ""));
+    let after = clean(stripChat(line.slice(m.index + m[0].length)).replace(LABEL, "").replace(PHONE_LABEL, ""));
     if (inline && (CITY.test(line) || !/[A-Za-z]{2}/.test(inline))) inline = "";
     if (isJunk(inline)) inline = "";
-    const name = inline || pending[0] || "";
-    out.push({
-      name,
-      phone: "+" + normaliseNum(digits)
-    });
-    pending = []; // consumed
+    if (isJunk(after) || !/[A-Za-z]{2}/.test(after)) after = "";
+    const name = stripLabels(inline) || pending[0] || stripLabels(after) || "";
+    const idx = out.push({ name, phone: "+" + normaliseNum(digits) }) - 1;
+    awaiting = name ? -1 : idx;
+    pending = [];
   }
   const seen = new Map();
   for (const c of out) {
