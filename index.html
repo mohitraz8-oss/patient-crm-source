@@ -1083,7 +1083,7 @@ const db = {
     const {
       data,
       error
-    } = await sb.from("purchases").select("*").eq("call_requested", true).order("call_requested_at", {
+    } = await sb.from("purchases").select("*").or("call_requested.eq.true,discount_requested.eq.true").order("call_requested_at", {
       ascending: false
     });
     if (error) throw error;
