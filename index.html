@@ -2522,7 +2522,7 @@ function App({
     onCancel: () => setImportOpen(false),
     onImport: importContacts,
     destination: activeClinic + " · " + activeLocation,
-    existingPhones: new Set(patients.map(p => String(p.phone || "").replace(/\D/g, "").slice(-10)).filter(Boolean))
+    existingPhones: new Set(patients.filter(p => p.clinic === activeClinic).map(p => String(p.phone || "").replace(/\D/g, "").slice(-10)).filter(Boolean))
   }), composeIds && composePatients.length > 0 && !waQueue && !broadcast && /*#__PURE__*/React.createElement(Composer, {
     patients: composePatients,
     templates: templates,
