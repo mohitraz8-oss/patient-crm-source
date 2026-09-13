@@ -2651,11 +2651,12 @@ function RequestsInbox({ estimates, contacts, clinicChecks, videoCalls, plans, o
   const now = Date.now();
   const inTime = r => { if (tm === "all") return true; if (!r.ts) return false; if (tm === "today") return new Date(r.ts).toDateString() === new Date().toDateString(); const days = (now - new Date(r.ts).getTime()) / 86400000; return days <= (tm === "week" ? 7 : 30); };
   const timeSet = rows.filter(inTime);
-  const shown = timeSet.filter(r => ty === "all" ? true : ty === "disc" ? r.type === "disc" : r.type === ty);
-  const TP = { est: ["Graft estimate", "#EAF3DE", "#3B6D11"], con: ["Contact", "#E6F1FB", "#0C447C"], cli: ["Clinic check", "#FAEEDA", "#854F0B"], vid: ["Video call", "#EEEDFE", "#3C3489"], disc: ["Discount", "#CCEFEA", "#0E7C6B"] };
-  const SP = { Pending: ["#FAEEDA", "#854F0B"], New: ["#EAF3DE", "#3B6D11"], Reviewed: ["#F1EFE8", "#8A8A85"], Scheduled: ["#E6F1FB", "#0C447C"], Sent: ["#F1EFE8", "#8A8A85"], Contacted: ["#F1EFE8", "#8A8A85"], Done: ["#F1EFE8", "#8A8A85"], Discount: ["#CCEFEA", "#0E7C6B"] };
+  const buyerRows = (plans || []).filter(p => p.status === "paid").map(p => ({ id: "buy" + p.id, type: p.tier || "essential", name: p.contact_name || "Anonymous", phone: p.contact_phone || "—", summary: "₹" + Math.round((Number(p.amount) || 0) / 100).toLocaleString("en-IN") + (p.created_at ? " · " + new Date(p.created_at).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true }) : ""), status: "Paid", ts: p.created_at, raw: p }));
+  const shown = ty === "buyers" ? buyerRows.filter(inTime) : timeSet.filter(r => ty === "all" ? true : ty === "disc" ? r.type === "disc" : r.type === ty);
+  const TP = { est: ["Graft estimate", "#EAF3DE", "#3B6D11"], con: ["Contact", "#E6F1FB", "#0C447C"], cli: ["Clinic check", "#FAEEDA", "#854F0B"], vid: ["Video call", "#EEEDFE", "#3C3489"], disc: ["Discount", "#CCEFEA", "#0E7C6B"], essential: ["Essential", "#EAF3DE", "#3B6D11"], premium: ["Premium", "#FAEEDA", "#854F0B"], full: ["Full", "#E6F1FB", "#0C447C"], video_call: ["Video call", "#EEEDFE", "#3C3489"], clinic_check: ["Clinic review", "#CCEFEA", "#0E7C6B"] };
+  const SP = { Pending: ["#FAEEDA", "#854F0B"], New: ["#EAF3DE", "#3B6D11"], Reviewed: ["#F1EFE8", "#8A8A85"], Scheduled: ["#E6F1FB", "#0C447C"], Sent: ["#F1EFE8", "#8A8A85"], Contacted: ["#F1EFE8", "#8A8A85"], Done: ["#F1EFE8", "#8A8A85"], Discount: ["#CCEFEA", "#0E7C6B"], Paid: ["#EAF3DE", "#3B6D11"] };
   const pill = (t, b, f) => React.createElement("span", { style: { background: b, color: f, fontSize: 11.5, fontWeight: 500, padding: "3px 10px", borderRadius: 20, whiteSpace: "nowrap" } }, t);
-  const TYPES = [["all", "All"], ["est", "Graft estimates"], ["con", "Contacts"], ["disc", "Discounts"], ["cli", "Clinic checks"], ["vid", "Video calls"]];
+  const TYPES = [["all", "All"], ["est", "Graft estimates"], ["con", "Contacts"], ["disc", "Discounts"], ["cli", "Clinic checks"], ["vid", "Video calls"], ["buyers", "Buyers"]];
   const TIMES = [["today", "Today"], ["week", "This week"], ["month", "This month"], ["all", "All time"]];
   const tierN = t => (plans || []).filter(pp => pp.tier === t).length;
   const fmtR = n => n >= 1e5 ? "₹" + (n / 1e5).toFixed(2) + " L" : "₹" + Math.round(n).toLocaleString("en-IN");
@@ -2677,7 +2678,7 @@ function RequestsInbox({ estimates, contacts, clinicChecks, videoCalls, plans, o
     React.createElement("div", { style: { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 12, overflow: "hidden" } },
     React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", padding: "12px 14px", borderBottom: "1px solid var(--line)" } },
       React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: 7 } },
-      TYPES.map(([k, lbl]) => { const n = timeSet.filter(r => k === "all" ? true : k === "disc" ? r.type === "disc" : r.type === k).length; const on = ty === k;
+      TYPES.map(([k, lbl]) => { const n = k === "buyers" ? buyerRows.filter(inTime).length : timeSet.filter(r => k === "all" ? true : k === "disc" ? r.type === "disc" : r.type === k).length; const on = ty === k;
         return React.createElement("button", { key: k, onClick: () => setTy(k), style: { cursor: "pointer", fontFamily: "inherit", border: "1px solid " + (on ? "var(--primary)" : "var(--line)"), background: on ? "var(--primary)" : "var(--surface)", color: on ? "#fff" : "var(--ink)", padding: "5px 11px", borderRadius: 8, fontSize: 12.5, fontWeight: 500 } }, lbl + " ", React.createElement("span", { style: { opacity: .7 } }, n)); })),
       React.createElement("div", { style: { display: "flex", gap: 10, alignItems: "center" } },
         React.createElement("span", { style: { fontSize: 12, color: "var(--muted)" } }, shown.length + " request" + (shown.length === 1 ? "" : "s")),
@@ -2687,7 +2688,7 @@ function RequestsInbox({ estimates, contacts, clinicChecks, videoCalls, plans, o
     React.createElement("div", { className: "tablewrap" }, React.createElement("table", null,
       React.createElement("thead", null, React.createElement("tr", null,
         React.createElement("th", null, "Type"), React.createElement("th", null, "Name"), React.createElement("th", null, "Phone"), React.createElement("th", null, "Details"), React.createElement("th", null, "Status"), React.createElement("th", null, "Action"))),
-      React.createElement("tbody", null, shown.map(r => React.createElement("tr", { key: r.id, onClick: () => { setOpenRow(r); setForm({ grafts: (r.raw && r.raw.estimated_grafts) || "", note: (r.raw && (r.raw.admin_note || r.raw.note)) || "", link: (r.raw && r.raw.meet_link) || "", status: (r.raw && r.raw.status) || "new" }); }, style: { cursor: "pointer" } },
+      React.createElement("tbody", null, shown.map(r => React.createElement("tr", { key: r.id, onClick: () => { if (ty === "buyers") return; setOpenRow(r); setForm({ grafts: (r.raw && r.raw.estimated_grafts) || "", note: (r.raw && (r.raw.admin_note || r.raw.note)) || "", link: (r.raw && r.raw.meet_link) || "", status: (r.raw && r.raw.status) || "new" }); }, style: { cursor: "pointer" } },
         React.createElement("td", null, pill(TP[r.type][0], TP[r.type][1], TP[r.type][2])),
         React.createElement("td", null, r.name),
         React.createElement("td", null, r.phone || "\u2014"),
