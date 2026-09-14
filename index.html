@@ -2658,11 +2658,11 @@ function RequestsInbox({ estimates, contacts, clinicChecks, videoCalls, plans, o
   const pill = (t, b, f) => React.createElement("span", { style: { background: b, color: f, fontSize: 11.5, fontWeight: 500, padding: "3px 10px", borderRadius: 20, whiteSpace: "nowrap" } }, t);
   const TYPES = [["all", "All"], ["est", "Graft estimates"], ["con", "Contacts"], ["disc", "Discounts"], ["cli", "Clinic checks"], ["vid", "Video calls"], ["buyers", "Plan"]];
   const TIMES = [["today", "Today"], ["week", "This week"], ["month", "This month"], ["all", "All time"]];
-  const tierN = t => (plans || []).filter(pp => pp.tier === t).length;
+  const paidPlans = (plans || []).filter(pp => pp.status === "paid"); const tierN = t => paidPlans.filter(pp => pp.tier === t).length;
   const fmtR = n => n >= 1e5 ? "₹" + (n / 1e5).toFixed(2) + " L" : "₹" + Math.round(n).toLocaleString("en-IN");
   const eN = tierN("essential"), pN = tierN("premium"), fN = tierN("full");
-  const vN = (videoCalls || []).length, cN = (clinicChecks || []).length;
-  const tierEarn = t => (plans || []).filter(pp => pp.tier === t).reduce((a, pp) => a + (Number(pp.amount) || 0), 0) / 100;
+  const vN = tierN("video_call"), cN = tierN("clinic_check");
+  const tierEarn = t => paidPlans.filter(pp => pp.tier === t).reduce((a, pp) => a + (Number(pp.amount) || 0), 0) / 100;
   const eE = tierEarn("essential"), pE = tierEarn("premium"), fE = tierEarn("full"), vE = tierEarn("video_call"), cE = tierEarn("clinic_check");
   const planRev = eE + pE + fE + vE + cE;
   const kpis = [
