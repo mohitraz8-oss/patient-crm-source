@@ -2999,9 +2999,18 @@ function RecordsTable({
     className: "right cellmuted num"
   }, idx + 1), /*#__PURE__*/React.createElement("td", {
     className: "pname"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 158 }
   }, p.name || /*#__PURE__*/React.createElement("span", {
     className: "cellmuted"
-  }, "Unnamed")), /*#__PURE__*/React.createElement("td", {
+  }, "Unnamed")), p.notes && String(p.notes).trim() ? /*#__PURE__*/React.createElement("div", {
+    title: p.notes,
+    style: { display: "flex", alignItems: "center", gap: 4, marginTop: 2, maxWidth: 158, fontWeight: 400, fontSize: 12, color: "var(--muted)" }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: 12, height: 12, viewBox: "0 0 24 24", fill: "none", stroke: "#B45309", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", style: { flex: "none" }
+  }, /*#__PURE__*/React.createElement("path", { d: "M12 20h9" }), /*#__PURE__*/React.createElement("path", { d: "M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" })), /*#__PURE__*/React.createElement("span", {
+    style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }
+  }, p.notes)) : null), /*#__PURE__*/React.createElement("td", {
     className: "cellmuted num"
   }, p.phone || "—"), /*#__PURE__*/React.createElement("td", null, tagsFor(p).length === 0 ? /*#__PURE__*/React.createElement("span", {
     className: "cellmuted"
