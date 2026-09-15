@@ -3365,7 +3365,7 @@ function BookedTable({
       className: "cellmuted"
     }, "Untitled")), /*#__PURE__*/React.createElement("div", {
       className: "psub num"
-    }, p.phone || "—")), /*#__PURE__*/React.createElement("td", {
+    }, p.phone || "—"), p.notes && String(p.notes).trim() ? /*#__PURE__*/React.createElement("div", { className: "psub", title: p.notes, style: { display: "flex", alignItems: "center", gap: 4, marginTop: 2 } }, /*#__PURE__*/React.createElement("svg", { width: 12, height: 12, viewBox: "0 0 24 24", fill: "none", stroke: "#B45309", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", style: { flex: "none" } }, /*#__PURE__*/React.createElement("path", { d: "M12 20h9" }), /*#__PURE__*/React.createElement("path", { d: "M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" })), /*#__PURE__*/React.createElement("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 } }, p.notes)) : null), /*#__PURE__*/React.createElement("td", {
       onClick: e => e.stopPropagation()
     }, /*#__PURE__*/React.createElement("span", {
       className: "stagepick " + (STAGE_COLOR[p.stage] || "gray")
