@@ -3123,6 +3123,7 @@ function BookedTable({
   const [q, setQ] = useState("");
   const [fStage, setFStage] = useState("All");
   const [fMonth, setFMonth] = useState("All");
+  const [awaitingOnly, setAwaitingOnly] = useState(false);
   const months = useMemo(() => {
     const set = new Set();
     patients.forEach(p => {
@@ -3137,6 +3138,7 @@ function BookedTable({
     const n = q.trim().toLowerCase();
     return patients.filter(p => {
       if (fStage !== "All" && p.stage !== fStage) return false;
+      if (awaitingOnly && !(p.stage === "HT Done" && p.paymentStatus === "Pending")) return false;
       if (fMonth !== "All") {
         if (p.stage !== "HT Done") return false;
         if (monthKey(htWhen(p)) !== fMonth) return false;
@@ -3144,7 +3146,7 @@ function BookedTable({
       if (n && !(p.name + " " + p.phone).toLowerCase().includes(n)) return false;
       return true;
     });
-  }, [patients, q, fStage, fMonth]);
+  }, [patients, q, fStage, fMonth, awaitingOnly]);
   const totals = useMemo(() => {
     const bd = patients.filter(p => p.stage === "Booking" && p.paymentStatus === "Pending");
     const sd = patients.filter(p => p.stage === "HT Done" && p.paymentStatus === "Pending");
@@ -3268,14 +3270,15 @@ function BookedTable({
     key: m,
     value: m
   }, monthLabel(m))))), totals.awaitingCount > 0 && /*#__PURE__*/React.createElement("button", {
-    className: "btn sm" + (fStage === "HT Done" ? " primary" : ""),
-    onClick: () => setFStage(fStage === "HT Done" ? "All" : "HT Done")
-  }, fStage === "HT Done" ? "Showing awaiting payment" : `Awaiting payment (${totals.awaitingCount})`), (q || fStage !== "All" || fMonth !== "All") && /*#__PURE__*/React.createElement("button", {
+    className: "btn sm" + (awaitingOnly ? " primary" : ""),
+    onClick: () => { const next = !awaitingOnly; setAwaitingOnly(next); if (next) setFStage("All"); }
+  }, awaitingOnly ? "Showing awaiting payment" : `Awaiting payment (${totals.awaitingCount})`), (q || fStage !== "All" || fMonth !== "All" || awaitingOnly) && /*#__PURE__*/React.createElement("button", {
     className: "btn sm ghost",
     onClick: () => {
       setQ("");
       setFStage("All");
       setFMonth("All");
+      setAwaitingOnly(false);
     }
   }, "Clear"), /*#__PURE__*/React.createElement("div", {
     className: "spacer"
