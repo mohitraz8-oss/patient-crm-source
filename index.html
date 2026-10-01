@@ -407,6 +407,10 @@
   td.stick.s2 .pname,td.stick.s2 .psub{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   td.stick.s2 .pname{max-width:158px}
 
+
+.phone-cell .copy-ic{opacity:0;transition:opacity .15s ease}
+.phone-cell:hover .copy-ic{opacity:1}
+@media (hover:none){.phone-cell .copy-ic{opacity:1}}
 </style>
 </head>
 <body>
@@ -2645,7 +2649,7 @@ function RequestsInbox({ estimates, contacts, clinicChecks, videoCalls, plans, o
   const now = Date.now();
   const inTime = r => { if (tm === "all") return true; if (!r.ts) return false; if (tm === "today") return new Date(r.ts).toDateString() === new Date().toDateString(); const days = (now - new Date(r.ts).getTime()) / 86400000; return days <= (tm === "week" ? 7 : 30); };
   const timeSet = rows.filter(inTime);
-  const buyerRows = (plans || []).filter(p => p.status === "paid").map(p => ({ id: "buy" + p.id, type: p.tier || "essential", name: p.contact_name || "Anonymous", phone: p.contact_phone || "—", summary: (p.contact_city ? p.contact_city + " · " : "") + "₹" + Math.round((Number(p.amount) || 0) / 100).toLocaleString("en-IN") + (p.created_at ? " · " + new Date(p.created_at).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true }) : ""), status: "Paid", ts: p.created_at, raw: p }));
+  const buyerRows = (plans || []).filter(p => p.status === "paid").map(p => ({ id: "buy" + p.id, type: p.tier || "essential", name: p.contact_name || "Anonymous", phone: p.contact_phone || "—", address: p.contact_city || "", summary: "₹" + Math.round((Number(p.amount) || 0) / 100).toLocaleString("en-IN") + (p.created_at ? " · " + new Date(p.created_at).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true }) : ""), status: "Paid", ts: p.created_at, raw: p }));
   const shown = ty === "buyers" ? buyerRows.filter(inTime) : timeSet.filter(r => ty === "all" ? true : ty === "disc" ? r.type === "disc" : r.type === ty);
   const TP = { est: ["Graft estimate", "#EAF3DE", "#3B6D11"], con: ["Contact", "#E6F1FB", "#0C447C"], cli: ["Clinic check", "#FAEEDA", "#854F0B"], vid: ["Video call", "#EEEDFE", "#3C3489"], disc: ["Discount", "#CCEFEA", "#0E7C6B"], essential: ["Essential", "#EAF3DE", "#3B6D11"], premium: ["Premium", "#FAEEDA", "#854F0B"], full: ["Full", "#E6F1FB", "#0C447C"], video_call: ["Video call", "#EEEDFE", "#3C3489"], clinic_check: ["Clinic review", "#CCEFEA", "#0E7C6B"] };
   const SP = { Pending: ["#FAEEDA", "#854F0B"], New: ["#EAF3DE", "#3B6D11"], Reviewed: ["#F1EFE8", "#8A8A85"], Scheduled: ["#E6F1FB", "#0C447C"], Sent: ["#F1EFE8", "#8A8A85"], Contacted: ["#F1EFE8", "#8A8A85"], Done: ["#F1EFE8", "#8A8A85"], Discount: ["#CCEFEA", "#0E7C6B"], Paid: ["#EAF3DE", "#3B6D11"] };
@@ -2681,11 +2685,12 @@ function RequestsInbox({ estimates, contacts, clinicChecks, videoCalls, plans, o
     shown.length === 0 ? React.createElement("div", { style: { padding: 22, color: "var(--muted)", fontSize: 13 } }, "No requests in this range.") :
     React.createElement("div", { className: "tablewrap" }, React.createElement("table", null,
       React.createElement("thead", null, React.createElement("tr", null,
-        React.createElement("th", null, "Type"), React.createElement("th", null, "Name"), React.createElement("th", null, "Phone"), React.createElement("th", null, "Details"), React.createElement("th", null, "Contacted"), React.createElement("th", null, "Status"), React.createElement("th", null, "Action"))),
+        React.createElement("th", null, "Type"), React.createElement("th", null, "Name"), React.createElement("th", null, "Phone"), React.createElement("th", null, "Address"), React.createElement("th", null, "Details"), React.createElement("th", null, "Contacted"), React.createElement("th", null, "Status"), React.createElement("th", null, "Action"))),
       React.createElement("tbody", null, shown.map(r => React.createElement("tr", { key: r.id, onClick: () => { if (ty === "buyers") return; setOpenRow(r); setForm({ grafts: (r.raw && r.raw.estimated_grafts) || "", note: (r.raw && (r.raw.admin_note || r.raw.note)) || "", link: (r.raw && r.raw.meet_link) || "", status: (r.raw && r.raw.status) || "new" }); }, style: messaged.has(r.id) ? { cursor: "pointer", background: "#F4F9EE" } : { cursor: "pointer" } },
         React.createElement("td", null, pill(TP[r.type][0], TP[r.type][1], TP[r.type][2])),
         React.createElement("td", null, r.name),
-        React.createElement("td", null, r.phone || "\u2014"),
+        React.createElement("td", { className: "phone-cell", style: { whiteSpace: "nowrap" } }, React.createElement("span", { style: { verticalAlign: "middle" } }, r.phone || "\u2014"), (r.phone && r.phone !== "\u2014") ? React.createElement("button", { className: "copy-ic", title: "Copy number", onClick: e => { e.stopPropagation(); const n = String(r.phone || "").replace(/[^\d+]/g, ""); try { navigator.clipboard.writeText(n); } catch (_) {} const b = e.currentTarget; b.style.color = "#07603E"; setTimeout(() => { try { b.style.color = "var(--muted)"; } catch (_) {} }, 1000); }, style: { marginLeft: 6, verticalAlign: "middle", background: "none", border: "none", cursor: "pointer", padding: 2, lineHeight: 0, color: "var(--muted)" } }, React.createElement("svg", { width: 15, height: 15, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("rect", { x: 9, y: 9, width: 13, height: 13, rx: 2 }), React.createElement("path", { d: "M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" }))) : null),
+        React.createElement("td", { style: { maxWidth: 220, whiteSpace: "normal", lineHeight: 1.35 } }, r.address || "\u2014"),
         React.createElement("td", { title: r.summary, style: { maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, r.summary),
         React.createElement("td", null, ty === "buyers" ? React.createElement("button", { onClick: e => { e.stopPropagation(); markMsg(r.id, !messaged.has(r.id)); }, title: messaged.has(r.id) ? "Contacted \u2014 click to undo" : "Mark as contacted", style: { cursor: "pointer", fontFamily: "inherit", fontSize: 11.5, fontWeight: 500, padding: "4px 11px", borderRadius: 999, whiteSpace: "nowrap", border: messaged.has(r.id) ? "1px solid #BFE0A8" : "1px solid var(--line)", background: messaged.has(r.id) ? "#EAF3DE" : "var(--surface)", color: messaged.has(r.id) ? "#3B6D11" : "var(--muted)" } }, messaged.has(r.id) ? "\u2713 Contacted" : "Mark") : null),
         React.createElement("td", null, pill(((["Done","Reviewed","Contacted","Sent"].includes(r.status) ? "✓ " : r.status === "Pending" ? "◷ " : "") + r.status), (SP[r.status] || ["#F1EFE8", "#444441"])[0], (SP[r.status] || ["#F1EFE8", "#444441"])[1])),
