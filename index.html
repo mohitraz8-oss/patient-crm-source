@@ -2599,7 +2599,7 @@ function FinancePanel({ patients, activeClinic, clinicLocations }) {
   const rows = Object.keys(byClinic).map(k => ({ clinic: k, amt: byClinic[k] })).sort((a, b) => b.amt - a.amt);
   const maxC = Math.max(1, ...rows.map(r => r.amt));
   const earned = sum(pd), upcoming = sum(bd) + sum(ht), surgeries = ht.length + pd.length;
-  const _flocs = (clinicLocations && clinicLocations[clinic]) || []; const CF = _flocs.length > 1 ? [["all", "All"]].concat(_flocs.map(l => [l, l])) : [];
+  const _flocs = (clinicLocations && clinicLocations[clinic]) || []; const CF = _flocs.length > 1 ? _flocs : [];
   const TF = [["all", "All time"], ["year", "This year"], ["month", "This month"]];
   const mkCards = sub => {
     const _bd = sub.filter(p => p.stage === "Booking" && p.paymentStatus === "Pending"), _ht = sub.filter(p => p.stage === "HT Done" && p.paymentStatus === "Pending"), _pd = sub.filter(p => p.paymentStatus === "Payment Done");
@@ -2623,7 +2623,7 @@ function FinancePanel({ patients, activeClinic, clinicLocations }) {
   const btn = (on, lbl, fn) => React.createElement("button", { onClick: fn, style: { cursor: "pointer", fontFamily: "inherit", border: "1px solid " + (on ? "var(--primary)" : "var(--line)"), background: on ? "var(--primary)" : "var(--surface)", color: on ? "#fff" : "var(--ink)", padding: "5px 11px", borderRadius: 8, fontSize: 12.5, fontWeight: 500 } }, lbl);
   return React.createElement("div", { style: { padding: "16px 0" } },
     React.createElement("div", { style: { display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 16 } },
-      React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } }, CF.map(([k, l]) => React.createElement(React.Fragment, { key: k }, btn(loc === k, l, () => setLoc(k))))),
+      React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } }, CF.map(l => React.createElement("span", { key: l, className: "cpill" + (loc === l ? " on" : ""), onClick: () => setLoc(l), role: "button" }, l, loc === l && React.createElement("button", { className: "pillx", title: "Clear", onClick: e => { e.stopPropagation(); setLoc("all"); } }, "×")))),
       React.createElement("select", { value: tm, onChange: e => setTm(e.target.value), className: "tsel" }, TF.map(([k, l]) => React.createElement("option", { key: k, value: k }, l)))),
     React.createElement("div", null, clinic !== "all" && locs.length > 1 && React.createElement("div", { style: { fontSize: 12, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".04em", marginBottom: 8 } }, clinic + " · combined"), renderCards(mkCards(booked)), React.createElement("div", { style: { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 12, padding: "16px 18px" } },
       React.createElement("div", { style: { fontSize: 13.5, fontWeight: 600, marginBottom: 14 } }, clinic === "all" ? "Received by clinic" : "Received by " + clinic + " (by location)"),
