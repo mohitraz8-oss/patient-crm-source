@@ -2433,7 +2433,7 @@ function App({
   }, pendingEstimatesCount + pendingContactsCount + pendingClinicChecksCount + pendingVideoCallsCount)), /*#__PURE__*/React.createElement("button", { className: "wftab" + (activeWorkflow === "finance" ? " on" : ""), onClick: () => switchWorkflow("finance") }, "Finance"), /*#__PURE__*/React.createElement("div", { className: "spacer" }), (activeWorkflow === "record" || activeWorkflow === "booked") && /*#__PURE__*/React.createElement("button", {
     className: "btn primary",
     onClick: addBlank
-  }, I.plus, " ", activeWorkflow === "record" ? "Add record" : "Add booked patient")), activeWorkflow === "finance" ? /*#__PURE__*/React.createElement(FinancePanel, { patients: patients }) : activeWorkflow === "requests" ? /*#__PURE__*/React.createElement(RequestsInbox, {
+  }, I.plus, " ", activeWorkflow === "record" ? "Add record" : "Add booked patient")), activeWorkflow === "finance" ? /*#__PURE__*/React.createElement(FinancePanel, { patients: patients, activeClinic: activeClinic, clinicLocations: clinicLocations }) : activeWorkflow === "requests" ? /*#__PURE__*/React.createElement(RequestsInbox, {
     estimates: estimates, contacts: contacts, clinicChecks: clinicChecks, videoCalls: videoCalls, plans: plans,
     onOpen: switchWorkflow,
     onSendEstimate: sendEstimate, onMarkContacted: markContacted, onReviewClinic: reviewClinicCheck, onSaveVideo: scheduleVideoCall,
@@ -2571,13 +2571,15 @@ function App({
 /* =========================================================================
    ESTIMATES PANEL  (graft-estimate requests from the Hair Transplant Guide)
    ========================================================================= */
-function FinancePanel({ patients }) {
-  const [clinic, setClinic] = useState("all");
+function FinancePanel({ patients, activeClinic, clinicLocations }) {
+  const clinic = activeClinic || "all";
+  const [loc, setLoc] = useState("all");
+  useEffect(() => { setLoc("all"); }, [activeClinic]);
   const [tm, setTm] = useState("all");
   const allBooked = (patients || []).filter(p => p.workflow === "booked" && p.stage !== "Refunded");
   const clinics = Array.from(new Set(allBooked.map(p => p.clinic))).filter(Boolean);
   const inTime = p => { if (tm === "all") return true; const d = p.bookingDate ? new Date(p.bookingDate) : null; if (!d || isNaN(d)) return false; const now = new Date(); if (tm === "year") return d.getFullYear() === now.getFullYear(); return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth(); };
-  const booked = allBooked.filter(p => (clinic === "all" || p.clinic === clinic) && inTime(p));
+  const booked = allBooked.filter(p => (clinic === "all" || p.clinic === clinic) && (loc === "all" || p.location === loc) && inTime(p));
   const sum = arr => arr.reduce((a, p) => a + commissionOf(p), 0);
   const pkg = arr => arr.reduce((a, p) => a + (p.finalPackage || 0), 0);
   const bd = booked.filter(p => p.stage === "Booking" && p.paymentStatus === "Pending");
@@ -2597,7 +2599,7 @@ function FinancePanel({ patients }) {
   const rows = Object.keys(byClinic).map(k => ({ clinic: k, amt: byClinic[k] })).sort((a, b) => b.amt - a.amt);
   const maxC = Math.max(1, ...rows.map(r => r.amt));
   const earned = sum(pd), upcoming = sum(bd) + sum(ht), surgeries = ht.length + pd.length;
-  const CF = [["all", "All clinics"]].concat(clinics.map(c => [c, c]));
+  const _flocs = (clinicLocations && clinicLocations[clinic]) || []; const CF = _flocs.length > 1 ? [["all", "All"]].concat(_flocs.map(l => [l, l])) : [];
   const TF = [["all", "All time"], ["year", "This year"], ["month", "This month"]];
   const mkCards = sub => {
     const _bd = sub.filter(p => p.stage === "Booking" && p.paymentStatus === "Pending"), _ht = sub.filter(p => p.stage === "HT Done" && p.paymentStatus === "Pending"), _pd = sub.filter(p => p.paymentStatus === "Payment Done");
@@ -2621,7 +2623,7 @@ function FinancePanel({ patients }) {
   const btn = (on, lbl, fn) => React.createElement("button", { onClick: fn, style: { cursor: "pointer", fontFamily: "inherit", border: "1px solid " + (on ? "var(--primary)" : "var(--line)"), background: on ? "var(--primary)" : "var(--surface)", color: on ? "#fff" : "var(--ink)", padding: "5px 11px", borderRadius: 8, fontSize: 12.5, fontWeight: 500 } }, lbl);
   return React.createElement("div", { style: { padding: "16px 0" } },
     React.createElement("div", { style: { display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 16 } },
-      React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } }, CF.map(([k, l]) => React.createElement(React.Fragment, { key: k }, btn(clinic === k, l, () => setClinic(k))))),
+      React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } }, CF.map(([k, l]) => React.createElement(React.Fragment, { key: k }, btn(loc === k, l, () => setLoc(k))))),
       React.createElement("select", { value: tm, onChange: e => setTm(e.target.value), className: "tsel" }, TF.map(([k, l]) => React.createElement("option", { key: k, value: k }, l)))),
     React.createElement("div", null, clinic !== "all" && locs.length > 1 && React.createElement("div", { style: { fontSize: 12, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".04em", marginBottom: 8 } }, clinic + " · combined"), renderCards(mkCards(booked)), React.createElement("div", { style: { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 12, padding: "16px 18px" } },
       React.createElement("div", { style: { fontSize: 13.5, fontWeight: 600, marginBottom: 14 } }, clinic === "all" ? "Received by clinic" : "Received by " + clinic + " (by location)"),
