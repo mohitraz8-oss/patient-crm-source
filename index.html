@@ -1687,6 +1687,7 @@ function App({
   const [activeClinic, setActiveClinic] = useState("");
   const [activeLocation, setActiveLocation] = useState("");
   const [activeWorkflow, setActiveWorkflow] = useState("booked");
+  useEffect(() => { if (activeWorkflow !== "finance" && activeLocation === "all") { const ls = clinicLocations[activeClinic] || []; if (ls[0]) setActiveLocation(ls[0]); } }, [activeWorkflow]);
   const [dlOpen, setDlOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [unlocked, setUnlocked] = useState(() => new Set());
@@ -2344,7 +2345,7 @@ function App({
     className: "clinics"
   }, clinicNames.map(c => /*#__PURE__*/React.createElement("span", {
     key: c,
-    className: "cpill" + (activeClinic === c && activeWorkflow !== "finance" ? " on" : ""),
+    className: "cpill" + (activeClinic === c ? " on" : ""),
     onClick: () => switchClinic(c),
     role: "button"
   }, c, " ", /*#__PURE__*/React.createElement("span", {
@@ -2385,7 +2386,7 @@ function App({
     onClick: () => { if (window.confirm("Log out of the CRM?")) onSignOut(); }
   }, I.signout))), /*#__PURE__*/React.createElement("div", {
     className: "loctabs"
-  }, (clinicLocations[activeClinic] || []).map(l => /*#__PURE__*/React.createElement("span", {
+  }, activeWorkflow === "finance" && (clinicLocations[activeClinic] || []).length > 1 && React.createElement("span", { key: "__all", className: "ltab" + (activeLocation === "all" ? " on" : ""), onClick: () => setActiveLocation("all"), role: "button" }, "All"), (clinicLocations[activeClinic] || []).map(l => /*#__PURE__*/React.createElement("span", {
     key: l,
     className: "ltab" + (activeLocation === l ? " on" : ""),
     onClick: () => switchLocation(l),
@@ -2433,7 +2434,7 @@ function App({
   }, pendingEstimatesCount + pendingContactsCount + pendingClinicChecksCount + pendingVideoCallsCount)), /*#__PURE__*/React.createElement("button", { className: "wftab" + (activeWorkflow === "finance" ? " on" : ""), onClick: () => switchWorkflow("finance") }, "Finance"), /*#__PURE__*/React.createElement("div", { className: "spacer" }), (activeWorkflow === "record" || activeWorkflow === "booked") && /*#__PURE__*/React.createElement("button", {
     className: "btn primary",
     onClick: addBlank
-  }, I.plus, " ", activeWorkflow === "record" ? "Add record" : "Add booked patient")), activeWorkflow === "finance" ? /*#__PURE__*/React.createElement(FinancePanel, { patients: patients, activeClinic: activeClinic, clinicLocations: clinicLocations }) : activeWorkflow === "requests" ? /*#__PURE__*/React.createElement(RequestsInbox, {
+  }, I.plus, " ", activeWorkflow === "record" ? "Add record" : "Add booked patient")), activeWorkflow === "finance" ? /*#__PURE__*/React.createElement(FinancePanel, { patients: patients, activeClinic: activeClinic, activeLocation: activeLocation, clinicLocations: clinicLocations }) : activeWorkflow === "requests" ? /*#__PURE__*/React.createElement(RequestsInbox, {
     estimates: estimates, contacts: contacts, clinicChecks: clinicChecks, videoCalls: videoCalls, plans: plans,
     onOpen: switchWorkflow,
     onSendEstimate: sendEstimate, onMarkContacted: markContacted, onReviewClinic: reviewClinicCheck, onSaveVideo: scheduleVideoCall,
@@ -2571,10 +2572,9 @@ function App({
 /* =========================================================================
    ESTIMATES PANEL  (graft-estimate requests from the Hair Transplant Guide)
    ========================================================================= */
-function FinancePanel({ patients, activeClinic, clinicLocations }) {
+function FinancePanel({ patients, activeClinic, activeLocation, clinicLocations }) {
   const clinic = activeClinic || "all";
-  const [loc, setLoc] = useState("all");
-  useEffect(() => { setLoc("all"); }, [activeClinic]);
+  const loc = activeLocation || "all";
   const [tm, setTm] = useState("all");
   const allBooked = (patients || []).filter(p => p.workflow === "booked" && p.stage !== "Refunded");
   const clinics = Array.from(new Set(allBooked.map(p => p.clinic))).filter(Boolean);
@@ -2623,7 +2623,6 @@ function FinancePanel({ patients, activeClinic, clinicLocations }) {
   const btn = (on, lbl, fn) => React.createElement("button", { onClick: fn, style: { cursor: "pointer", fontFamily: "inherit", border: "1px solid " + (on ? "var(--primary)" : "var(--line)"), background: on ? "var(--primary)" : "var(--surface)", color: on ? "#fff" : "var(--ink)", padding: "5px 11px", borderRadius: 8, fontSize: 12.5, fontWeight: 500 } }, lbl);
   return React.createElement("div", { style: { padding: "16px 0" } },
     React.createElement("div", { style: { display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 16 } },
-      React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } }, CF.map(l => React.createElement("span", { key: l, className: "cpill" + (loc === l ? " on" : ""), onClick: () => setLoc(l), role: "button" }, l, loc === l && React.createElement("button", { className: "pillx", title: "Clear", onClick: e => { e.stopPropagation(); setLoc("all"); } }, "×")))),
       React.createElement("select", { value: tm, onChange: e => setTm(e.target.value), className: "tsel" }, TF.map(([k, l]) => React.createElement("option", { key: k, value: k }, l)))),
     React.createElement("div", null, clinic !== "all" && locs.length > 1 && React.createElement("div", { style: { fontSize: 12, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".04em", marginBottom: 8 } }, clinic + " · combined"), renderCards(mkCards(booked)), React.createElement("div", { style: { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 12, padding: "16px 18px" } },
       React.createElement("div", { style: { fontSize: 13.5, fontWeight: 600, marginBottom: 14 } }, clinic === "all" ? "Received by clinic" : "Received by " + clinic + " (by location)"),
